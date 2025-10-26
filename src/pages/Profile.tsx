@@ -155,7 +155,7 @@ const Profile = () => {
           ) : items.length === 0 ? (
             <p className="text-muted-foreground">No uploads yet.</p>
           ) : (
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {items.map((item) => (
                 <Card key={item._id} className="card-texture">
                   <CardHeader>

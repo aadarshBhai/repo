@@ -275,6 +275,15 @@ const Upload = () => {
                 )}
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="consent-file">Upload Consent File</Label>
+                <Input 
+                  id="consent-file" 
+                  type="file" 
+                  onChange={(e) => setConsentFile(e.target.files?.[0] || null)}
+                />
+              </div>
+
               {/* Consent */}
               <div className="space-y-2">
                 <Label htmlFor="consent-type">Consent Type</Label>
@@ -288,15 +297,6 @@ const Upload = () => {
                     <SelectItem value="video">Video</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="consent-file">Upload Consent File</Label>
-                <Input 
-                  id="consent-file" 
-                  type="file" 
-                  onChange={(e) => setConsentFile(e.target.files?.[0] || null)}
-                />
               </div>
 
               <div className="space-y-2">
