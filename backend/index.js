@@ -28,24 +28,21 @@ app.use("/api/uploads", uploadsRoutes);
 // ===== Serve Uploaded Files =====
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ===== Serve Frontend (Vite build) =====
-app.use(express.static(path.join(__dirname, "../dist")));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../dist", "index.html"));
-});
+// ===== Do NOT Serve Frontend Here =====
+// (Frontend will be deployed separately on Netlify/Vercel)
+// Remove any 'dist' serving to prevent Render build errors
 
 // ===== Connect to MongoDB =====
 const mongoUri = process.env.MONGODB_URI;
 
 if (!mongoUri) {
   console.error(
-    "❌ MONGODB_URI is not set. Make sure backend/.env contains MONGODB_URI and dotenv is loading it."
+    "❌ MONGODB_URI is not set. Make sure backend/.env contains MONGODB_URI."
   );
   process.exit(1);
 }
 
-// Mask password in log
+// Mask password in logs
 try {
   const masked = mongoUri.replace(/:\/\/([^:]+):([^@]+)@/, "://$1:****@");
   console.log("Attempting MongoDB connection with URI:", masked);
