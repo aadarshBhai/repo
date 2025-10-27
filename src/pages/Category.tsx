@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 import { ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { mediaSrc } from "@/lib/utils";
 
 const Category = () => {
   const { categoryName } = useParams();
@@ -80,13 +81,13 @@ const Category = () => {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {item.type === 'video' && item.contentUrl ? (
-                    <video src={item.contentUrl} controls className="w-full rounded" />
+                    <video src={mediaSrc(item.contentUrl)} controls className="w-full rounded" />
                   ) : item.type === 'audio' && item.contentUrl ? (
-                    <audio src={item.contentUrl} controls className="w-full" />
+                    <audio src={mediaSrc(item.contentUrl)} controls className="w-full" />
                   ) : item.type === 'text' && item.contentUrl && /\.pdf(\?|$)/i.test(item.contentUrl) ? (
                     <div className="w-full">
                       <iframe
-                        src={item.contentUrl}
+                        src={mediaSrc(item.contentUrl)}
                         title="PDF"
                         className="w-full h-80 border rounded"
                       />

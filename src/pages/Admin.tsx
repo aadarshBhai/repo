@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import Footer from "@/components/Footer";
 import { FileText, CheckCircle, XCircle, Users } from "lucide-react";
+import { mediaSrc } from "@/lib/utils";
  
 
 const Admin = () => {
@@ -15,16 +16,17 @@ const Admin = () => {
   const [loading, setLoading] = useState(false);
 
   const renderConsentPreview = (url: string) => {
-    if (/\.(png|jpe?g|gif|webp|bmp|svg)(\?|$)/i.test(url)) {
-      return <img src={url} alt="Consent file" className="w-full h-auto rounded" />;
+    const u = mediaSrc(url);
+    if (/\.(png|jpe?g|gif|webp|bmp|svg)(\?|$)/i.test(u)) {
+      return <img src={u} alt="Consent file" className="w-full h-auto rounded" />;
     }
-    if (/\.(mp4|webm|ogg)(\?|$)/i.test(url)) {
-      return <video src={url} controls className="w-full rounded" />;
+    if (/\.(mp4|webm|ogg)(\?|$)/i.test(u)) {
+      return <video src={u} controls className="w-full rounded" />;
     }
-    if (/\.(mp3|wav|ogg)(\?|$)/i.test(url)) {
-      return <audio src={url} controls className="w-full" />;
+    if (/\.(mp3|wav|ogg)(\?|$)/i.test(u)) {
+      return <audio src={u} controls className="w-full" />;
     }
-    return <iframe src={url} title="Consent preview" className="w-full h-64 md:h-80 border rounded" />;
+    return <iframe src={u} title="Consent preview" className="w-full h-64 md:h-80 border rounded" />;
   };
 
   const fetchItems = async (status: string) => {
@@ -181,13 +183,13 @@ const Admin = () => {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {item.type === 'video' && item.contentUrl ? (
-                        <video src={item.contentUrl} controls className="w-full rounded" />
+                        <video src={mediaSrc(item.contentUrl)} controls className="w-full rounded" />
                       ) : item.type === 'audio' && item.contentUrl ? (
-                        <audio src={item.contentUrl} controls className="w-full" />
+                        <audio src={mediaSrc(item.contentUrl)} controls className="w-full" />
                       ) : item.type === 'text' && item.contentUrl && /\.pdf(\?|$)/i.test(item.contentUrl) ? (
                         <div className="w-full">
                           <iframe
-                            src={item.contentUrl}
+                            src={mediaSrc(item.contentUrl)}
                             title="PDF preview"
                             className="w-full h-80 border rounded"
                           />

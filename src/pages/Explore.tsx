@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { mediaSrc } from "@/lib/utils";
 
 const categories = [
   { label: "Folktales", value: "folktales" },
@@ -274,19 +275,19 @@ const Explore = () => {
                     <div className="relative h-40 bg-neutral-100 overflow-hidden">
                       {hasMedia ? (
                         item.type === 'video' ? (
-                          <video src={item.contentUrl} className="w-full h-full object-cover" muted />
+                          <video src={mediaSrc(item.contentUrl)} className="w-full h-full object-cover" muted />
                         ) : item.type === 'audio' ? (
                           <div className="w-full h-full flex items-center justify-center bg-neutral-200 text-neutral-600">
-                            <audio src={item.contentUrl} controls className="w-11/12" onClick={(e) => e.stopPropagation()} />
+                            <audio src={mediaSrc(item.contentUrl)} controls className="w-11/12" onClick={(e) => e.stopPropagation()} />
                           </div>
                         ) : thumbIsPdf ? (
                           <iframe
-                            src={item.contentUrl}
+                            src={mediaSrc(item.contentUrl)}
                             title="PDF preview"
                             className="w-full h-full border-0"
                           />
                         ) : (
-                          <img src={item.contentUrl} alt={item.title} className="w-full h-full object-cover" />
+                          <img src={mediaSrc(item.contentUrl)} alt={item.title} className="w-full h-full object-cover" />
                         )
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-neutral-200 text-neutral-600">No preview</div>
@@ -339,7 +340,7 @@ const Explore = () => {
                           {item.consent.fileUrl && openConsentId === item._id && (
                             <div className="rounded border bg-background p-2" onClick={(e) => e.stopPropagation()}>
                               <iframe
-                                src={String(item.consent.fileUrl)}
+                                src={mediaSrc(String(item.consent.fileUrl))}
                                 title="Consent PDF"
                                 className="w-full h-40 md:h-56 border-0 rounded"
                               />
