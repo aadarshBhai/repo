@@ -75,9 +75,12 @@ router.post(
 router.get('/', async (req, res) => {
   try {
     const filter = {};
-    // If a specific status is requested and not 'all', apply it; otherwise return all
     const status = req.query.status;
-    if (status && String(status).toLowerCase() !== 'all') {
+    // Default visibility: only approved to the public
+    if (!status) {
+      filter.status = 'approved';
+    } else if (String(status).toLowerCase() !== 'all') {
+      // Allow explicit filtering to a single status (e.g., pending/rejected)
       filter.status = status;
     }
     if (req.query.category) filter.category = req.query.category;
