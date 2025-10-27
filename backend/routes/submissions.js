@@ -74,7 +74,12 @@ router.post(
 
 router.get('/', async (req, res) => {
   try {
-    const filter = { status: 'approved' };
+    const filter = {};
+    // If a specific status is requested and not 'all', apply it; otherwise return all
+    const status = req.query.status;
+    if (status && String(status).toLowerCase() !== 'all') {
+      filter.status = status;
+    }
     if (req.query.category) filter.category = req.query.category;
     if (req.query.tribe) filter.tribe = String(req.query.tribe).toLowerCase();
     const items = await Submission.find(filter).sort({ createdAt: -1 });
