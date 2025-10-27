@@ -1,36 +1,20 @@
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { v2 as cloudinary } from 'cloudinary';
 
 const router = express.Router();
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: function (_req, _file, cb) {
-    cb(null, uploadsDir);
-  },
-  filename: function (_req, file, cb) {
-    const safeBase = path.parse(file.originalname).name.replace(/[^a-z0-9_-]/gi, '_');
-    const ext = path.extname(file.originalname) || '';
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, `${safeBase}-${unique}${ext}`);
-  },
+// Configure Cloudinary from env
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Use memory storage; upload buffer to Cloudinary
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 200 * 1024 * 1024 }, // 200MB
 });
 
@@ -56,14 +40,43 @@ function requireAuth(req, res, next) {
   }
 }
 
-// POST /api/uploads - returns { url }
-router.post('/', requireAuth, upload.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ errors: [{ msg: 'No file uploaded' }] });
+// Helper to upload a buffer to Cloudinary via stream
+function uploadToCloudinary(fileBuffer, originalname) {
+  return new Promise((resolve, reject) => {
+    const opts = {
+      resource_type: 'auto',
+      folder: 'uploads',
+      public_id: undefined,
+    };
+    const stream = cloudinary.uploader.upload_stream(opts, (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    });
+    stream.end(fileBuffer);
+  });
+}
+
+// POST /api/uploads - returns { url, path }
+router.post('/', requireAuth, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ errors: [{ msg: 'No file uploaded' }] });
+    }
+
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return res.status(500).json({ errors: [{ msg: 'Server misconfiguration: Cloudinary env vars not set' }] });
+    }
+
+    const result = await uploadToCloudinary(req.file.buffer, req.file.originalname);
+    const secureUrl = result?.secure_url || result?.url;
+    if (!secureUrl) throw new Error('Upload failed');
+
+    // Return absolute URL as both url and path so frontend continues to work
+    return res.json({ url: secureUrl, path: secureUrl, publicId: result.public_id, resourceType: result.resource_type });
+  } catch (e) {
+    console.error('Cloudinary upload error:', e);
+    return res.status(500).json({ errors: [{ msg: 'Upload failed' }] });
   }
-  const relPath = `/uploads/${req.file.filename}`;
-  const absUrl = `${req.protocol}://${req.get('host')}${relPath}`;
-  return res.json({ url: absUrl, path: relPath });
 });
 
 export default router;
