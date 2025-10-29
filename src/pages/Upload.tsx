@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
  
 import Footer from "@/components/Footer";
@@ -14,16 +14,16 @@ const Upload = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [textContent, setTextContent] = useState("");
   const [type, setType] = useState<'text' | 'audio' | 'video' | 'image'>('text');
   const [contentUrl, setContentUrl] = useState("");
   const [contentFile, setContentFile] = useState<File | null>(null);
-  const [textBody, setTextBody] = useState("");
   const [category, setCategory] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [tribe, setTribe] = useState<string>("");
   const [country, setCountry] = useState<string>("");
   const [stateRegion, setStateRegion] = useState<string>("");
+  const [village, setVillage] = useState<string>("");
   const [consentGiven, setConsentGiven] = useState(false);
   const [consentName, setConsentName] = useState("");
   const [consentFile, setConsentFile] = useState<File | null>(null);
@@ -35,11 +35,11 @@ const Upload = () => {
     "Folktales",
     "Folksongs",
     "Folk Dances",
-    "Traditional Attire",
+    "Material Culture",
     "Ritual Practices"
   ];
 
-  const tribes = [
+  const tribesAll = [
     "Angami",
     "Ao",
     "Chakhesang",
@@ -74,6 +74,44 @@ const Upload = () => {
     "India": ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Delhi","Chandigarh","Puducherry","Lakshadweep","Andaman and Nicobar Islands","Dadra and Nagar Haveli and Daman and Diu","Ladakh","Jammu & Kashmir"],
   };
 
+  // Derive tribe options by country/state (basic example: India -> Nagaland)
+  const tribeOptions = useMemo(() => {
+    if (country === 'India' && stateRegion === 'Nagaland') return tribesAll;
+    return [] as string[];
+  }, [country, stateRegion]);
+
+  // Load/save form data to persist until successful submission
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('uploadForm');
+      if (raw) {
+        const saved = JSON.parse(raw);
+        setTitle(saved.title || "");
+        setTextContent(saved.textContent || "");
+        setType(saved.type || 'text');
+        setContentUrl(saved.contentUrl || "");
+        setCategory(saved.category || "");
+        setTribe(saved.tribe || "");
+        setCountry(saved.country || "");
+        setStateRegion(saved.stateRegion || "");
+        setVillage(saved.village || "");
+        setConsentGiven(Boolean(saved.consentGiven));
+        setConsentName(saved.consentName || "");
+        setWarningOther(Boolean(saved.warningOther));
+        setWarningOtherText(saved.warningOtherText || "");
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const data = {
+      title, textContent, type, contentUrl, category, tribe, country, stateRegion, village,
+      consentGiven, consentName, warningOther, warningOtherText
+    };
+    try { localStorage.setItem('uploadForm', JSON.stringify(data)); } catch {}
+  }, [title, textContent, type, contentUrl, category, tribe, country, stateRegion, village, consentGiven, consentName, warningOther, warningOtherText]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 py-12 px-4">
@@ -93,82 +131,7 @@ const Upload = () => {
               <p className="text-sm text-muted-foreground">All fields are required for review</p>
             </div>
 
-              {/* Title */}
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input id="title" placeholder="Enter content title" value={title} onChange={(e) => setTitle(e.target.value)} />
-              </div>
-
-              {/* Content Type */}
-              <div className="space-y-2">
-                <Label htmlFor="type">Content Type</Label>
-                <Select value={type} onValueChange={(v) => setType(v as any)}>
-                  <SelectTrigger id="type">
-                    <SelectValue placeholder="Select content type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text">Text</SelectItem>
-                    <SelectItem value="audio">Audio</SelectItem>
-                    <SelectItem value="video">Video</SelectItem>
-                    <SelectItem value="image">Image</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Content Input */}
-              {type === 'text' ? (
-                <div className="space-y-2">
-                  <Label htmlFor="text">Text Content</Label>
-                  <Textarea 
-                    id="text" 
-                    placeholder="Write or paste the text content" 
-                    rows={8}
-                    value={textBody}
-                    onChange={(e) => setTextBody(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">Or upload a PDF below.</p>
-                </div>
-              ) : type === 'image' ? (
-                <div className="space-y-2">
-                  <Label htmlFor="contentUrl">Image URL</Label>
-                  <Input 
-                    id="contentUrl" 
-                    placeholder={'https://example.com/file.jpg'} 
-                    value={contentUrl}
-                    onChange={(e) => setContentUrl(e.target.value)}
-                  />
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label htmlFor="contentUrl">{type === 'audio' ? 'Audio URL' : 'Video URL'}</Label>
-                  <Input 
-                    id="contentUrl" 
-                    placeholder={type === 'audio' ? 'https://example.com/file.mp3' : 'https://example.com/file.mp4'} 
-                    value={contentUrl}
-                    onChange={(e) => setContentUrl(e.target.value)}
-                  />
-                </div>
-              )}
-
-              <div className="h-px bg-border" />
-              <div className="text-sm text-muted-foreground">
-                Note: Uploads are submitted for admin approval. Only approved items appear publicly on Explore.
-              </div>
-              <div className="h-px bg-border" />
-
-              {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea 
-                  id="description" 
-                  placeholder="Provide a detailed description" 
-                  rows={5}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-
-              {/* Category → Country → State/Region → Tribe */}
+              {/* Category → Country → State/Region → Tribe → Village */}
               <div className="space-y-4">
                 {/* Category */}
                 <div className="space-y-2">
@@ -218,117 +181,177 @@ const Upload = () => {
                 {/* Tribe */}
                 <div className="space-y-2">
                   <Label htmlFor="tribe">Tribe</Label>
-                  <Select value={tribe} onValueChange={setTribe}>
+                  <Select value={tribe} onValueChange={setTribe} disabled={tribeOptions.length === 0}>
                     <SelectTrigger id="tribe">
-                      <SelectValue placeholder="Select tribe" />
+                      <SelectValue placeholder={tribeOptions.length ? "Select tribe" : "Select country/state first"} />
                     </SelectTrigger>
                     <SelectContent>
-                      {tribes.map((t) => (
+                      {tribeOptions.map((t) => (
                         <SelectItem key={t} value={t.toLowerCase()}>{t}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              {/* Sensitivity Level */}
-              <div className="space-y-2">
-                <Label htmlFor="sensitivity">Sensitivity Level</Label>
-                <Select>
-                  <SelectTrigger id="sensitivity">
-                    <SelectValue placeholder="Select sensitivity level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="public">Public</SelectItem>
-                    <SelectItem value="restricted">Restricted</SelectItem>
-                    <SelectItem value="confidential">Confidential</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Content Warnings */}
-              <div className="space-y-3">
-                <Label>Content Warnings (check all that apply)</Label>
+                {/* Village */}
                 <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="ritual" />
-                    <label htmlFor="ritual" className="text-sm cursor-pointer">Ritual Practices</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="nudity" />
-                    <label htmlFor="nudity" className="text-sm cursor-pointer">Partial Nudity</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="cultural" />
-                    <label htmlFor="cultural" className="text-sm cursor-pointer">Cultural Practices</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="others" checked={warningOther} onCheckedChange={(v) => setWarningOther(Boolean(v))} />
-                    <label htmlFor="others" className="text-sm cursor-pointer">Others</label>
-                  </div>
+                  <Label htmlFor="village">Village</Label>
+                  <Input id="village" placeholder="Enter village" value={village} onChange={(e) => setVillage(e.target.value)} />
                 </div>
-                {warningOther && (
-                  <div className="space-y-2">
-                    <Label htmlFor="others-text">Please specify</Label>
-                    <Input id="others-text" placeholder="Type the content warning" value={warningOtherText} onChange={(e) => setWarningOtherText(e.target.value)} />
+              </div>
+
+              {/* Content Section */}
+              <div className="rounded-lg border p-4 bg-indigo-50/40">
+                {/* Title */}
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input id="title" placeholder="Enter content title" value={title} onChange={(e) => setTitle(e.target.value)} />
+                </div>
+
+                {/* Content Type */}
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="type">Content Type</Label>
+                  <Select value={type} onValueChange={(v) => setType(v as any)}>
+                    <SelectTrigger id="type">
+                      <SelectValue placeholder="Select content type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text">Text</SelectItem>
+                      <SelectItem value="audio">Audio</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                      <SelectItem value="image">Image</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Text Content (Short Description) */}
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="text-content">Text Content (Short Description)</Label>
+                  <Textarea
+                    id="text-content"
+                    placeholder={type === 'text' ? 'Write or paste the text content (used as both description and full text)' : 'Write a short description'}
+                    rows={type === 'text' ? 8 : 5}
+                    value={textContent}
+                    onChange={(e) => setTextContent(e.target.value)}
+                  />
+                  {type === 'text' && (
+                    <p className="text-xs text-muted-foreground">Or upload a PDF below.</p>
+                  )}
+                </div>
+
+                {/* Content URL or File */}
+                {type !== 'text' && (
+                  <div className="space-y-2 mt-4">
+                    <Label htmlFor="contentUrl">{type === 'image' ? 'Image URL' : (type === 'audio' ? 'Audio URL' : 'Video URL')}</Label>
+                    <Input
+                      id="contentUrl"
+                      placeholder={type === 'image' ? 'https://example.com/file.jpg' : (type === 'audio' ? 'https://example.com/file.mp3' : 'https://example.com/file.mp4')}
+                      value={contentUrl}
+                      onChange={(e) => setContentUrl(e.target.value)}
+                    />
                   </div>
                 )}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="consent-file">Upload Consent File</Label>
-                <Input 
-                  id="consent-file" 
-                  type="file" 
-                  onChange={(e) => setConsentFile(e.target.files?.[0] || null)}
-                />
-              </div>
-
-              {/* Consent */}
-              <div className="space-y-2">
-                <Label htmlFor="consent-type">Consent Type</Label>
-                <Select>
-                  <SelectTrigger id="consent-type">
-                    <SelectValue placeholder="Select consent type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="written">Written</SelectItem>
-                    <SelectItem value="audio">Audio</SelectItem>
-                    <SelectItem value="video">Video</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="consent-name">Consent Name</Label>
-                <Input 
-                  id="consent-name" 
-                  placeholder="Name of consenting person" 
-                  value={consentName} 
-                  onChange={(e) => setConsentName(e.target.value)} 
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox id="consent-given" checked={consentGiven} onCheckedChange={(v) => setConsentGiven(Boolean(v))} />
-                <label htmlFor="consent-given" className="text-sm cursor-pointer">I confirm that consent has been given</label>
-              </div>
-
-              {/* File Upload */}
-              <div className="space-y-2">
-                <Label htmlFor="content-file">{type === 'text' ? 'Upload PDF (optional)' : 'Upload Content File'}</Label>
-                <Input 
-                  id="content-file" 
-                  type="file" 
-                  accept={
-                    type === 'video' ? 'video/mp4' : (
-                      type === 'audio' ? 'audio/mpeg,audio/mp3' : (
-                        type === 'image' ? 'image/*' : 'application/pdf'
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="content-file">{type === 'text' ? 'Upload PDF (optional)' : 'Upload Content File'}</Label>
+                  <Input
+                    id="content-file"
+                    type="file"
+                    accept={
+                      type === 'video' ? 'video/*' : (
+                        type === 'audio' ? 'audio/*' : (
+                          type === 'image' ? 'image/*' : 'application/pdf'
+                        )
                       )
-                    )
-                  }
-                  onChange={(e) => setContentFile(e.target.files?.[0] || null)}
-                />
+                    }
+                    onChange={(e) => setContentFile(e.target.files?.[0] || null)}
+                  />
+                </div>
+
+                {/* Sensitivity Level */}
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="sensitivity">Sensitivity Level</Label>
+                  <Select>
+                    <SelectTrigger id="sensitivity">
+                      <SelectValue placeholder="Select sensitivity level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="restricted">Restricted</SelectItem>
+                      <SelectItem value="confidential">Confidential</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Content Warnings */}
+                <div className="space-y-3 mt-4">
+                  <Label>Content Warnings (check all that apply)</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="ritual" />
+                      <label htmlFor="ritual" className="text-sm cursor-pointer">Ritual Practices</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="nudity" />
+                      <label htmlFor="nudity" className="text-sm cursor-pointer">Partial Nudity</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="cultural" />
+                      <label htmlFor="cultural" className="text-sm cursor-pointer">Cultural Practices</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="others" checked={warningOther} onCheckedChange={(v) => setWarningOther(Boolean(v))} />
+                      <label htmlFor="others" className="text-sm cursor-pointer">Others</label>
+                    </div>
+                  </div>
+                  {warningOther && (
+                    <div className="space-y-2">
+                      <Label htmlFor="others-text">Please specify</Label>
+                      <Input id="others-text" placeholder="Type the content warning" value={warningOtherText} onChange={(e) => setWarningOtherText(e.target.value)} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Consent Section */}
+              <div className="rounded-lg border p-4 bg-emerald-50/50">
+                <div className="space-y-2">
+                  <Label htmlFor="consent-file">Upload Consent File</Label>
+                  <Input
+                    id="consent-file"
+                    type="file"
+                    onChange={(e) => setConsentFile(e.target.files?.[0] || null)}
+                  />
+                </div>
+
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="consent-type">Consent Type</Label>
+                  <Select>
+                    <SelectTrigger id="consent-type">
+                      <SelectValue placeholder="Select consent type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="written">Written</SelectItem>
+                      <SelectItem value="audio">Audio</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="consent-name">Consent Name</Label>
+                  <Input
+                    id="consent-name"
+                    placeholder="Name of consenting person"
+                    value={consentName}
+                    onChange={(e) => setConsentName(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2 mt-4">
+                  <Checkbox id="consent-given" checked={consentGiven} onCheckedChange={(v) => setConsentGiven(Boolean(v))} />
+                  <label htmlFor="consent-given" className="text-sm cursor-pointer">I confirm that consent has been given</label>
+                </div>
               </div>
 
               {/* Submit Button */}
@@ -338,7 +361,7 @@ const Upload = () => {
                 disabled={
                   submitting ||
                   !title.trim() ||
-                  !description.trim() ||
+                  !textContent.trim() ||
                   !category
                 }
                 onClick={async () => {
@@ -350,9 +373,10 @@ const Upload = () => {
                     const effectiveTribe = tribe || undefined;
                     const effectiveCountry = country || undefined;
                     const effectiveState = stateRegion || undefined;
+                    const effectiveVillage = village || undefined;
 
                     // Enforce content presence rules
-                    if (type === 'text' && !textBody.trim()) {
+                    if (type === 'text' && !textContent.trim()) {
                       if (!contentFile) {
                         toast({ title: 'Missing content', description: 'Provide text content or upload a PDF', variant: 'destructive' });
                         setSubmitting(false);
@@ -435,14 +459,15 @@ const Upload = () => {
                       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token2}` },
                       body: JSON.stringify({
                         title: title.trim(),
-                        description: description.trim(),
+                        description: textContent.trim(),
                         category: effectiveCategory,
                         tribe: effectiveTribe,
                         country: effectiveCountry,
                         state: effectiveState,
+                        village: effectiveVillage,
                         type,
                         contentUrl: ((type !== 'text') || (mediaUrl)) ? mediaUrl : undefined,
-                        text: type === 'text' ? (textBody.trim() || undefined) : undefined,
+                        text: type === 'text' ? (textContent.trim() || undefined) : undefined,
                         consent: {
                           given: consentGiven,
                           name: consentName.trim(),
@@ -461,17 +486,18 @@ const Upload = () => {
                     toast({ title: 'Submitted for review', description: 'Your content was sent to admin for approval' });
                     // Reset form
                     setTitle("");
-                    setDescription("");
+                    setTextContent("");
                     setType('text');
                     setContentUrl("");
                     setContentFile(null);
-                    setTextBody("");
                     setCategory("");
                     setTribe("");
                     setCountry("");
                     setStateRegion("");
+                    setVillage("");
                     setWarningOther(false);
                     setWarningOtherText("");
+                    try { localStorage.removeItem('uploadForm'); } catch {}
                     navigate('/explore');
                   } catch (err: any) {
                     toast({ title: 'Error', description: err.message || 'Submit failed', variant: 'destructive' });

@@ -133,6 +133,15 @@ const Profile = () => {
             </p>
           </div>
 
+          <div className="mb-6 rounded-lg border bg-emerald-50/60 text-emerald-900 p-4 flex items-start gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 mt-0.5">
+              <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm9.75-6a.75.75 0 0 1 .75.75V12a.75.75 0 0 1-.39.659l-3.75 2.063a.75.75 0 1 1-.72-1.318l3.36-1.846V6.75a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm md:text-base">
+              This section is maintained for further collaboration and networking.
+            </p>
+          </div>
+
           {profile && (
             <Card className="card-texture mb-8">
               <CardHeader>

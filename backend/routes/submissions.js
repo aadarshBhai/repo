@@ -46,6 +46,9 @@ router.post(
     body('contentUrl').optional().isString().trim(),
     body('text').optional().isString().trim(),
     body('tribe').optional().isString().trim(),
+    body('country').optional().isString().trim(),
+    body('state').optional().isString().trim(),
+    body('village').optional().isString().trim(),
     body('consent.given').isBoolean(),
     body('consent.name').isString().trim().notEmpty(),
     body('consent.relation').optional().isString().trim(),
@@ -56,13 +59,16 @@ router.post(
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     try {
-      const { title, description, category, type, contentUrl, text, tribe, consent } = req.body;
+      const { title, description, category, type, contentUrl, text, tribe, country, state, village, consent } = req.body;
       const payload = { title, description, category, status: 'pending' };
       if (req.userId) payload.userId = req.userId;
       if (type) payload.type = type;
       if (contentUrl) payload.contentUrl = contentUrl;
       if (text) payload.text = text;
       if (tribe) payload.tribe = String(tribe).toLowerCase();
+      if (country) payload.country = country;
+      if (state) payload.state = state;
+      if (village) payload.village = village;
       if (consent) payload.consent = consent;
       const doc = await Submission.create(payload);
       res.status(201).json(doc);
@@ -85,6 +91,9 @@ router.get('/', async (req, res) => {
     }
     if (req.query.category) filter.category = req.query.category;
     if (req.query.tribe) filter.tribe = String(req.query.tribe).toLowerCase();
+    if (req.query.country) filter.country = req.query.country;
+    if (req.query.state) filter.state = req.query.state;
+    if (req.query.village) filter.village = req.query.village;
     const items = await Submission.find(filter).sort({ createdAt: -1 });
     res.json(items);
   } catch (e) {

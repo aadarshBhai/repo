@@ -13,7 +13,7 @@ const categories = [
   { label: "Folktales", value: "folktales" },
   { label: "Folksongs", value: "folksongs" },
   { label: "Folk Dances", value: "folk-dances" },
-  { label: "Traditional Attire", value: "traditional-attire" },
+  { label: "Material Culture", value: "material-culture" },
   { label: "Ritual Practices", value: "ritual-practices" },
 ];
 
@@ -75,7 +75,9 @@ const Explore = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
-  const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const [pendingItem, setPendingItem] = useState<any | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [openItem, setOpenItem] = useState<any | null>(null);
   const [openConsentId, setOpenConsentId] = useState<string | null>(null);
 
   const q = searchParams.get("q") || "";
@@ -84,6 +86,7 @@ const Explore = () => {
   const sort = (searchParams.get("sort") || "latest") as "latest" | "oldest" | "views";
   const country = searchParams.get("country") || "";
   const stateRegion = searchParams.get("state") || "";
+  const village = searchParams.get("village") || "";
 
   const tribes = [
     "Angami",
@@ -121,6 +124,7 @@ const Explore = () => {
         if (category) qs.set("category", category);
         if (country) qs.set("country", country);
         if (stateRegion) qs.set("state", stateRegion);
+        if (village) qs.set("village", village);
         const res = await fetch(`/api/submissions?${qs.toString()}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data?.errors?.[0]?.msg || "Failed to load content");
@@ -144,6 +148,10 @@ const Explore = () => {
         String(it.description || "").toLowerCase().includes(needle)
       );
     }
+    if (village.trim()) {
+      const vneedle = village.toLowerCase();
+      arr = arr.filter((it) => String(it.village || "").toLowerCase().includes(vneedle));
+    }
     if (sort === "latest") {
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     } else if (sort === "oldest") {
@@ -152,7 +160,7 @@ const Explore = () => {
       arr.sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0));
     }
     return arr;
-  }, [items, q, sort]);
+  }, [items, q, sort, village]);
 
   const fmtAgo = (iso?: string) => {
     if (!iso) return "";
@@ -163,22 +171,24 @@ const Explore = () => {
     return `${days} days ago`;
   };
 
-  const handleCardClick = (href: string, sensitivity?: string) => {
-    const level = String(sensitivity || "public").toLowerCase();
+  const handleCardClick = (item: any) => {
+    const href = `#`;
+    const level = String(item?.sensitivity || "public").toLowerCase();
     if (level === "restricted" || level === "confidential") {
-      setPendingHref(href);
+      setPendingItem(item);
       setDisclaimerOpen(true);
       return;
     }
-    navigate(href);
+    setOpenItem(item);
+    setPreviewOpen(true);
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 py-8 px-4">
         <div className="container mx-auto max-w-7xl">
-          <div className="mb-6 grid grid-cols-1 md:grid-cols-12 gap-3">
-            <div className="md:col-span-6">
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <div className="basis-full sm:basis-auto flex-1 min-w-[220px]">
               <Input
                 value={q}
                 onChange={(e) => changeParam("q", e.target.value)}
@@ -186,7 +196,7 @@ const Explore = () => {
                 aria-label="Search"
               />
             </div>
-            <div className="md:col-span-2">
+            <div>
               <Select value={sort} onValueChange={(v) => changeParam("sort", v)}>
                 <SelectTrigger aria-label="Sort by">
                   <SelectValue placeholder="Sort by" />
@@ -198,7 +208,7 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="md:col-span-2">
+            <div>
               <Select value={category} onValueChange={(v) => changeParam("category", v)}>
                 <SelectTrigger aria-label="Category">
                   <SelectValue placeholder="Category" />
@@ -210,7 +220,7 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="md:col-span-2">
+            <div>
               <Select value={country} onValueChange={(v) => changeParam("country", v)}>
                 <SelectTrigger aria-label="Country">
                   <SelectValue placeholder="Country" />
@@ -222,7 +232,7 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="md:col-span-2">
+            <div>
               <Select value={stateRegion} onValueChange={(v) => changeParam("state", v)} disabled={!country}>
                 <SelectTrigger aria-label="State or Region">
                   <SelectValue placeholder={country ? "State/Region" : "Select country first"} />
@@ -234,7 +244,7 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="md:col-span-2">
+            <div>
               <Select value={tribe} onValueChange={(v) => changeParam("tribe", v)}>
                 <SelectTrigger aria-label="Tribe">
                   <SelectValue placeholder="Tribe" />
@@ -246,7 +256,15 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="md:col-span-12 flex gap-2">
+            <div className="min-w-[160px]">
+              <Input
+                value={village}
+                onChange={(e) => changeParam("village", e.target.value)}
+                placeholder="Village"
+                aria-label="Village"
+              />
+            </div>
+            <div className="flex gap-2">
               <Button variant="outline" onClick={() => setSearchParams({}, { replace: true })}>Reset</Button>
             </div>
           </div>
@@ -262,13 +280,12 @@ const Explore = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((item) => {
-                const href = `/category/${String(item.category || "").toLowerCase()}?${searchParams.toString()}`;
                 const thumbIsPdf = item.type === 'text' && item.contentUrl && /\.pdf(\?|$)/i.test(item.contentUrl);
                 const hasMedia = Boolean(item.contentUrl);
                 return (
                   <button
                     key={item._id}
-                    onClick={() => handleCardClick(href, item.sensitivity)}
+                    onClick={() => handleCardClick(item)}
                     className="w-full text-left rounded-xl overflow-hidden border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                     style={{ background: '#FFF8F0' }}
                   >
@@ -368,7 +385,40 @@ const Explore = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Go Back</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { if (pendingHref) navigate(pendingHref); setPendingHref(null); }}>I Understand, Continue</AlertDialogAction>
+            <AlertDialogAction onClick={() => { if (pendingItem) { setOpenItem(pendingItem); setPreviewOpen(true); } setPendingItem(null); }}>I Understand, Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Preview Modal */}
+      <AlertDialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <AlertDialogContent className="max-w-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{openItem?.title}</AlertDialogTitle>
+            <AlertDialogDescription>{openItem?.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3">
+            {openItem?.type === 'video' && openItem?.contentUrl ? (
+              <video src={mediaSrc(openItem.contentUrl)} controls className="w-full rounded" />
+            ) : openItem?.type === 'audio' && openItem?.contentUrl ? (
+              <audio src={mediaSrc(openItem.contentUrl)} controls className="w-full" />
+            ) : openItem?.type === 'text' && openItem?.contentUrl && /\.pdf(\?|$)/i.test(openItem.contentUrl) ? (
+              <div className="w-full">
+                <iframe src={mediaSrc(openItem.contentUrl)} title="PDF preview" className="w-full h-96 border rounded" />
+              </div>
+            ) : openItem?.type === 'image' && openItem?.contentUrl ? (
+              <img src={mediaSrc(openItem.contentUrl)} alt={openItem?.title} className="w-full rounded" />
+            ) : openItem?.type === 'text' && openItem?.text ? (
+              <p className="text-sm leading-relaxed whitespace-pre-wrap max-h-96 overflow-auto">{openItem.text}</p>
+            ) : null}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPreviewOpen(false)}>Close</AlertDialogCancel>
+            {openItem?.contentUrl && (
+              <a href={mediaSrc(openItem.contentUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center h-10 px-4 py-2 bg-primary text-primary-foreground rounded-md">
+                Download
+              </a>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

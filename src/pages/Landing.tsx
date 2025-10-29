@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import heroBg from "@/assets/hero-bg.jpg";
 import { useRef } from "react";
-import { ArrowDown, PlayCircle, Map, Sparkles, Image as ImageIcon } from "lucide-react";
+import { ArrowDown, PlayCircle, Map, Sparkles } from "lucide-react";
 
 const Landing = () => {
   const howRef = useRef<HTMLDivElement | null>(null);
@@ -17,12 +17,12 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
       <Navigation />
 
       {/* Hero Section */}
       <section
-        className="relative h-[86svh] md:h-[92svh] flex items-center justify-center overflow-hidden"
+        className="relative h-[86svh] md:h-[92svh] flex items-center justify-start overflow-hidden"
         style={{
           backgroundImage: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.5)), url(${heroBg})`,
           backgroundSize: "cover",
@@ -38,8 +38,8 @@ const Landing = () => {
           <path d="M0,500 C240,420 480,580 720,500 C960,420 1200,580 1440,500" fill="none" stroke="white" strokeWidth="1.5" />
           <path d="M0,700 C240,620 480,780 720,700 C960,620 1200,780 1440,700" fill="none" stroke="white" strokeWidth="1" />
         </svg>
-        <div className="relative z-10 w-full max-w-6xl mx-auto px-6 md:px-8">
-          <div className="max-w-2xl md:max-w-3xl lg:max-w-3xl text-left">
+        <div className="relative z-10 w-full px-0 md:px-0">
+          <div className="max-w-2xl md:max-w-3xl lg:max-w-3xl text-left pl-4 sm:pl-6 md:pl-8">
             <h1 className="font-body uppercase tracking-[0.08em] text-primary-foreground text-4xl md:text-6xl lg:text-7xl leading-[1.1] font-semibold">
               Heritage Repository
             </h1>
@@ -61,7 +61,7 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="mt-6 md:mt-8 flex items-center justify-start gap-3 text-primary-foreground/90">
+          <div className="mt-6 md:mt-8 flex items-center justify-start gap-3 text-primary-foreground/90 pl-4 sm:pl-6 md:pl-8">
             <button
               onClick={() => scrollTo(howRef)}
               className="inline-flex items-center gap-2 rounded-full/50 text-xs md:text-sm hover:text-primary transition-colors"
@@ -75,6 +75,35 @@ const Landing = () => {
 
         {/* Subtle gradient for depth */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background/40 to-transparent" />
+      </section>
+
+      {/* About preview */}
+      <section className="relative py-10 md:py-14 bg-background border-t border-border/60">
+        <div className="relative w-full px-4 md:px-6">
+          <div className="max-w-5xl">
+            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">About Us</h2>
+            <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl">
+              This Heritage Repository is an ethical, consent-based digital archive dedicated to preserving and sharing indigenous cultural heritage through community-led documentation and cultural care.
+            </p>
+            <div className="mt-5">
+              <Button asChild size="sm"><Link to="/about-us">Learn More</Link></Button>
+            </div>
+          </div>
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            <div>
+              <h3 className="text-lg md:text-xl font-semibold">Our Mission</h3>
+              <p className="text-sm md:text-base text-foreground/80 mt-2 max-w-prose">
+                Build an accessible, community-informed archive that honors traditional knowledge and empowers continuity with authentic resources.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg md:text-xl font-semibold">Our Approach</h3>
+              <p className="text-sm md:text-base text-foreground/80 mt-2 max-w-prose">
+                Work closely with community members, elders, and cultural practitioners to ensure respectful representation and appropriate sensitivity.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* How It Works */}
@@ -134,30 +163,43 @@ const Landing = () => {
           <div className="mb-12 text-center">
             <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">Roadmaps</h2>
             <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
-              Structured, step-by-step learning journeys.
+              Structured journey from collection to publication with cultural verification.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-5 md:gap-7">
-            {[
-              { title: "Oral Histories", steps: 6 },
-              { title: "Traditional Weaving", steps: 8 },
-              { title: "Songs & Chants", steps: 7 },
-            ].map((r) => (
-              <div key={r.title} className="rounded-xl overflow-hidden border bg-card/80 hover:shadow-xl transition-shadow">
-                <div className="h-24 md:h-28 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20" />
+            {[{
+              key: 'collection',
+              title: 'Collection',
+              img: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=1200&auto=format&fit=crop',
+              caption: 'Document stories, songs, artifacts with community consent.'
+            },{
+              key: 'verification',
+              title: 'Verification',
+              img: 'https://images.unsplash.com/photo-1524230572899-a752b3835840?q=80&w=1200&auto=format&fit=crop',
+              caption: 'Elders and scholars review for accuracy and sensitivity.'
+            },{
+              key: 'publication',
+              title: 'Publication',
+              img: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=1200&auto=format&fit=crop',
+              caption: 'Publish with tiered access: public, restricted, confidential.'
+            }].map((r) => (
+              <div key={r.key} className="rounded-xl overflow-hidden border bg-card/80 hover:shadow-xl transition-shadow">
+                <div className="aspect-[16/9] w-full overflow-hidden">
+                  <img src={r.img} alt={r.title} className="w-full h-full object-cover" />
+                </div>
                 <div className="p-6">
                   <h3 className="text-base md:text-lg font-semibold">{r.title}</h3>
-                  <p className="text-xs md:text-sm text-muted-foreground mt-1">{r.steps} stages • mixed media</p>
-                  <div className="mt-3 md:mt-4 flex gap-2 md:gap-3">
-                    <Button variant="secondary" size="sm">Preview</Button>
-                    <Button asChild size="sm">
-                      <Link to="/explore">Start</Link>
-                    </Button>
-                  </div>
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1">{r.caption}</p>
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="mt-8 md:mt-10 text-center">
+            <p className="text-sm md:text-base text-foreground/80 max-w-3xl mx-auto">
+              You can upload folktales, folksongs, folk dances, ritual practices, and material culture (e.g., tools, garments, craft objects) as text, images, audio, or video. Each submission undergoes cultural verification and is assigned an appropriate sensitivity level before publication.
+            </p>
           </div>
 
           <div className="mt-12 text-center">
@@ -210,21 +252,30 @@ const Landing = () => {
           <div className="mb-12 text-center">
             <h2 className="text-2xl md:text-3xl font-bold heading-accent inline-block">Scenes from the Archive</h2>
             <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
-              Ethereal blends, textures, and colors inspired by traditional motifs.
+              A glimpse of real visual stories. Captions and tags help contextualize each photo.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4 md:gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="relative aspect-[4/3] overflow-hidden rounded-xl border group bg-gradient-to-br from-primary/10 via-accent/10 to-primary/10"
-              >
-                <div className="absolute inset-0 pattern-weave opacity-[.12] group-hover:opacity-20 transition-opacity" />
-                <div className="absolute inset-0 flex items-center justify-center text-foreground/70 group-hover:text-foreground/90 transition-colors">
-                  <ImageIcon className="h-6 w-6 md:h-8 md:w-8" />
-                </div>
-              </div>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {[
+              { src: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=1200&auto=format&fit=crop', caption: 'Community gathering at dusk', tags: ['community','ritual'] },
+              { src: 'https://images.unsplash.com/photo-1511295742362-92c96b1a37b6?q=80&w=1200&auto=format&fit=crop', caption: 'Handwoven patterns', tags: ['weaving','material-culture'] },
+              { src: 'https://images.unsplash.com/photo-1558981001-5cbe7f3f2bdc?q=80&w=1200&auto=format&fit=crop', caption: 'Oral history recording', tags: ['oral-history','audio'] },
+              { src: 'https://images.unsplash.com/photo-1531177071272-4c2b94387586?q=80&w=1200&auto=format&fit=crop', caption: 'Traditional dance practice', tags: ['dance'] },
+              { src: 'https://images.unsplash.com/photo-1532946332-4f9b8449be3f?q=80&w=1200&auto=format&fit=crop', caption: 'Craft tools and artifacts', tags: ['tools','craft'] },
+              { src: 'https://images.unsplash.com/photo-1511207538751-1883b1e0f838?q=80&w=1200&auto=format&fit=crop', caption: 'Mountain village landscape', tags: ['landscape','village'] },
+            ].map((g, i) => (
+              <figure key={i} className="group relative overflow-hidden rounded-xl border bg-background">
+                <img src={g.src} alt={g.caption} className="w-full h-48 md:h-52 object-cover group-hover:scale-[1.02] transition-transform" />
+                <figcaption className="p-3">
+                  <p className="text-sm text-foreground/90">{g.caption}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {g.tags.map(t => (
+                      <span key={t} className="text-[10px] px-2 py-0.5 rounded bg-muted/20 border">{t}</span>
+                    ))}
+                  </div>
+                </figcaption>
+              </figure>
             ))}
           </div>
 

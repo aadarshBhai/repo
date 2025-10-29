@@ -7,6 +7,9 @@ const SubmissionSchema = new mongoose.Schema(
     // optional fields to associate with a user in future
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     tribe: { type: String, index: true },
+    country: { type: String, index: true },
+    state: { type: String, index: true },
+    village: { type: String, index: true },
     type: {
       type: String,
       enum: ['text', 'audio', 'video', 'image'],
