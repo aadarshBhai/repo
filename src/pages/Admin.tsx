@@ -17,16 +17,23 @@ const Admin = () => {
 
   const renderConsentPreview = (url: string) => {
     const u = mediaSrc(url);
-    if (/\.(png|jpe?g|gif|webp|bmp|svg)(\?|$)/i.test(u)) {
+    if (/(\.(png|jpe?g|gif|webp|bmp|svg)(\?|$))/i.test(u)) {
       return <img src={u} alt="Consent file" className="w-full h-auto rounded" />;
     }
-    if (/\.(mp4|webm|ogg)(\?|$)/i.test(u)) {
+    if (/(\.(mp4|webm|ogg)(\?|$))/i.test(u)) {
       return <video src={u} controls className="w-full rounded" />;
     }
-    if (/\.(mp3|wav|ogg)(\?|$)/i.test(u)) {
+    if (/(\.(mp3|wav|ogg)(\?|$))/i.test(u)) {
       return <audio src={u} controls className="w-full" />;
     }
-    return <iframe src={u} title="Consent preview" className="w-full h-64 md:h-80 border rounded" />;
+    return (
+      <div className="space-y-2">
+        <iframe src={u} title="Consent preview" className="w-full h-64 md:h-80 border rounded" />
+        <div>
+          <a href={u} target="_blank" rel="noreferrer" className="underline text-primary text-sm">Open in new tab</a>
+        </div>
+      </div>
+    );
   };
 
   const fetchItems = async (status: string) => {
