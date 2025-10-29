@@ -30,6 +30,8 @@ const Upload = () => {
   // Content warnings 'Other'
   const [warningOther, setWarningOther] = useState(false);
   const [warningOtherText, setWarningOtherText] = useState("");
+  const [tribeOptions, setTribeOptions] = useState<string[]>([]);
+  const [tribesLoading, setTribesLoading] = useState(false);
 
   const categories = [
     "Folktales",
@@ -37,23 +39,6 @@ const Upload = () => {
     "Folk Dances",
     "Material Culture",
     "Ritual Practices"
-  ];
-
-  const tribesAll = [
-    "Angami",
-    "Ao",
-    "Chakhesang",
-    "Chang",
-    "Khiamniungan",
-    "Konyak",
-    "Lotha",
-    "Phom",
-    "Pochury",
-    "Rengma",
-    "Sangtam",
-    "Sumi",
-    "Yimchunger",
-    "Zeliang"
   ];
 
   const countries = [
@@ -74,10 +59,30 @@ const Upload = () => {
     "India": ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Delhi","Chandigarh","Puducherry","Lakshadweep","Andaman and Nicobar Islands","Dadra and Nagar Haveli and Daman and Diu","Ladakh","Jammu & Kashmir"],
   };
 
-  // Derive tribe options by country/state (basic example: India -> Nagaland)
-  const tribeOptions = useMemo(() => {
-    if (country === 'India' && stateRegion === 'Nagaland') return tribesAll;
-    return [] as string[];
+  // Fetch tribes when country/state change (same behavior as Explore page)
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setTribesLoading(true);
+      try {
+        if (!country || !stateRegion) {
+          if (active) setTribeOptions([]);
+          return;
+        }
+        const qs = new URLSearchParams();
+        qs.set("country", country);
+        qs.set("state", stateRegion);
+        const res = await fetch(`/api/submissions/tribes?${qs.toString()}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.errors?.[0]?.msg || "Failed to load tribes");
+        if (active) setTribeOptions(Array.isArray(data) ? data : []);
+      } catch (_e) {
+        if (active) setTribeOptions([]);
+      } finally {
+        if (active) setTribesLoading(false);
+      }
+    })();
+    return () => { active = false; };
   }, [country, stateRegion]);
 
   // Load/save form data to persist until successful submission
@@ -181,16 +186,36 @@ const Upload = () => {
                 {/* Tribe */}
                 <div className="space-y-2">
                   <Label htmlFor="tribe">Tribe</Label>
-                  <Select value={tribe} onValueChange={setTribe} disabled={tribeOptions.length === 0}>
-                    <SelectTrigger id="tribe">
-                      <SelectValue placeholder={tribeOptions.length ? "Select tribe" : "Select country/state first"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tribeOptions.map((t) => (
-                        <SelectItem key={t} value={t.toLowerCase()}>{t}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {tribeOptions.length > 0 ? (
+                    <Select
+                      value={tribe}
+                      onValueChange={setTribe}
+                      disabled={!country || !stateRegion || tribesLoading || tribeOptions.length === 0}
+                    >
+                      <SelectTrigger id="tribe">
+                        <SelectValue
+                          placeholder={
+                            !country || !stateRegion ? "Select country/state first" :
+                            tribesLoading ? "Loading tribes…" :
+                            tribeOptions.length === 0 ? "No tribes available" : "Select tribe"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tribeOptions.map((t) => (
+                          <SelectItem key={t} value={String(t).toLowerCase()}>{t}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      id="tribe"
+                      placeholder={!country || !stateRegion ? "Select country/state first" : "Type tribe"}
+                      value={tribe}
+                      onChange={(e) => setTribe(e.target.value)}
+                      disabled={!country || !stateRegion}
+                    />
+                  )}
                 </div>
 
                 {/* Village */}
