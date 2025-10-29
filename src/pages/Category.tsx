@@ -115,7 +115,7 @@ const Category = () => {
                       {item.consent.fileUrl && (
                         <div className="rounded border bg-background p-2">
                           <iframe
-                            src={String(item.consent.fileUrl)}
+                            src={mediaSrc(String(item.consent.fileUrl))}
                             title="Consent preview"
                             className="w-full h-64 md:h-80 border-0 rounded"
                           />
