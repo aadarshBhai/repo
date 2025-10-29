@@ -179,11 +179,9 @@ const Profile = () => {
                       <audio src={mediaSrc(item.contentUrl)} controls className="w-full" />
                     ) : item.type === 'text' && item.contentUrl && /\.pdf(\?|$)/i.test(item.contentUrl) ? (
                       <div className="w-full">
-                        <iframe
-                          src={mediaSrc(item.contentUrl)}
-                          title="PDF preview"
-                          className="w-full h-80 border rounded"
-                        />
+                        <Button asChild variant="secondary" size="sm">
+                          <a href={mediaSrc(item.contentUrl)} target="_blank" rel="noreferrer">Open PDF in new tab</a>
+                        </Button>
                       </div>
                     ) : item.type === 'text' && item.text ? (
                       <p className="text-sm leading-relaxed whitespace-pre-wrap max-h-40 overflow-auto">{item.text}</p>
@@ -253,11 +251,9 @@ const Profile = () => {
                         )}
                         {item.consent.fileUrl && (
                           <div className="rounded border bg-background p-2">
-                            <iframe
-                              src={String(item.consent.fileUrl)}
-                              title="Consent preview"
-                              className="w-full h-64 md:h-80 border-0 rounded"
-                            />
+                            <Button asChild variant="outline" size="sm">
+                              <a href={String(item.consent.fileUrl)} target="_blank" rel="noreferrer">Open consent file</a>
+                            </Button>
                           </div>
                         )}
                       </div>

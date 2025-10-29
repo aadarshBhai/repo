@@ -253,7 +253,7 @@ const Upload = () => {
                 )}
 
                 <div className="space-y-2 mt-4">
-                  <Label htmlFor="content-file">{type === 'text' ? 'Upload PDF (optional)' : 'Upload Content File'}</Label>
+                  <Label htmlFor="content-file" className="text-indigo-900">{type === 'text' ? 'Upload PDF (optional)' : 'Upload Content File'}</Label>
                   <Input
                     id="content-file"
                     type="file"
@@ -264,6 +264,7 @@ const Upload = () => {
                         )
                       )
                     }
+                    className="border-indigo-300 bg-indigo-50/60 focus-visible:ring-indigo-500"
                     onChange={(e) => setContentFile(e.target.files?.[0] || null)}
                   />
                 </div>
@@ -316,10 +317,11 @@ const Upload = () => {
               {/* Consent Section */}
               <div className="rounded-lg border p-4 bg-emerald-50/50">
                 <div className="space-y-2">
-                  <Label htmlFor="consent-file">Upload Consent File</Label>
+                  <Label htmlFor="consent-file" className="text-emerald-900">Upload Consent File</Label>
                   <Input
                     id="consent-file"
                     type="file"
+                    className="border-emerald-300 bg-emerald-50/60 focus-visible:ring-emerald-500"
                     onChange={(e) => setConsentFile(e.target.files?.[0] || null)}
                   />
                 </div>
