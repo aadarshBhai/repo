@@ -91,10 +91,18 @@ const Landing = () => {
           </div>
 
           <ol className="space-y-6 md:space-y-8 max-w-3xl mx-auto">
-            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
               <div className="flex items-center gap-3 text-primary mb-2">
                 <PlayCircle className="h-6 w-6" />
                 <h3 className="text-lg md:text-xl font-semibold">1. Explore & Learn</h3>
+              </div>
+              <div className="hidden md:block absolute right-4 top-4">
+                <img
+                  src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop"
+                  alt="Explore archives"
+                  className="w-28 h-20 rounded-lg object-cover border"
+                  loading="lazy"
+                />
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
                 <li>Browse folktales, songs, rituals, and artifacts contributed by communities.</li>
@@ -105,10 +113,18 @@ const Landing = () => {
               <p className="mt-3 text-xs md:text-sm text-foreground/80">🟢 Respect each item’s consent tier — not all content is meant for public use.</p>
             </li>
 
-            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
               <div className="flex items-center gap-3 text-primary mb-2">
                 <Sparkles className="h-6 w-6" />
                 <h3 className="text-lg md:text-xl font-semibold">2. Contribute Respectfully</h3>
+              </div>
+              <div className="hidden md:block absolute right-4 top-4">
+                <img
+                  src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop"
+                  alt="Contribute respectfully"
+                  className="w-28 h-20 rounded-lg object-cover border"
+                  loading="lazy"
+                />
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
                 <li>Share your own folktales, folksongs, dances, rituals, or artifacts as text, image, audio, or video.</li>
@@ -119,10 +135,18 @@ const Landing = () => {
               <p className="mt-3 text-xs md:text-sm text-foreground/80">🟢 Submissions are reviewed by community elders and cultural experts before publication.</p>
             </li>
 
-            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
               <div className="flex items-center gap-3 text-primary mb-2">
                 <Map className="h-6 w-6" />
                 <h3 className="text-lg md:text-xl font-semibold">3. Follow the Roadmap</h3>
+              </div>
+              <div className="hidden md:block absolute right-4 top-4">
+                <img
+                  src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=800&auto=format&fit=crop"
+                  alt="Roadmap flow"
+                  className="w-28 h-20 rounded-lg object-cover border"
+                  loading="lazy"
+                />
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
                 <li>Collection: Gathering stories and materials with consent.</li>
@@ -157,24 +181,48 @@ const Landing = () => {
           </div>
 
           <div className="max-w-3xl mx-auto">
-            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
               <h3 className="text-lg md:text-xl font-semibold">1️⃣ Collection</h3>
+              <div className="hidden md:block absolute right-4 top-4">
+                <img
+                  src="https://images.unsplash.com/photo-1510936111840-65e151ad71bb?q=80&w=800&auto=format&fit=crop"
+                  alt="Collection"
+                  className="w-28 h-20 rounded-lg object-cover border"
+                  loading="lazy"
+                />
+              </div>
               <p className="mt-2 text-sm md:text-base text-foreground/85">Community members document folktales, songs, dances, and artifacts — always with <strong>informed consent</strong> from the knowledge holders.</p>
               <p className="mt-2 text-xs md:text-sm text-foreground/80">🟢 <em>Goal: Preserve stories responsibly.</em></p>
             </div>
 
             <div className="my-3 md:my-4 text-center" aria-hidden>⬇️</div>
 
-            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
               <h3 className="text-lg md:text-xl font-semibold">2️⃣ Verification</h3>
+              <div className="hidden md:block absolute right-4 top-4">
+                <img
+                  src="https://images.unsplash.com/photo-1516383607781-913a19294fd1?q=80&w=800&auto=format&fit=crop"
+                  alt="Verification"
+                  className="w-28 h-20 rounded-lg object-cover border"
+                  loading="lazy"
+                />
+              </div>
               <p className="mt-2 text-sm md:text-base text-foreground/85"><strong>Elders, scholars, and cultural experts</strong> carefully review each submission for <strong>accuracy, sensitivity, and cultural integrity.</strong></p>
               <p className="mt-2 text-xs md:text-sm text-foreground/80">🟢 <em>Goal: Ensure authenticity and ethical handling.</em></p>
             </div>
 
             <div className="my-3 md:my-4 text-center" aria-hidden>⬇️</div>
 
-            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
               <h3 className="text-lg md:text-xl font-semibold">3️⃣ Publication</h3>
+              <div className="hidden md:block absolute right-4 top-4">
+                <img
+                  src="https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=800&auto=format&fit=crop"
+                  alt="Publication"
+                  className="w-28 h-20 rounded-lg object-cover border"
+                  loading="lazy"
+                />
+              </div>
               <p className="mt-2 text-sm md:text-base text-foreground/85">Once verified, the content is published in the Repository with <strong>tiered access:</strong></p>
               <ul className="mt-2 list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
                 <li>🟢 <em>Public</em> → Open for all viewers</li>

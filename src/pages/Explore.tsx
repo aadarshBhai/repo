@@ -72,6 +72,10 @@ const Explore = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [items, setItems] = useState<any[]>([]);
+  const [tribeOptions, setTribeOptions] = useState<string[]>([]);
+  const [tribesLoading, setTribesLoading] = useState(false);
+  const [villageOptions, setVillageOptions] = useState<string[]>([]);
+  const [villagesLoading, setVillagesLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
@@ -88,28 +92,24 @@ const Explore = () => {
   const stateRegion = searchParams.get("state") || "";
   const village = searchParams.get("village") || "";
 
-  const tribes = [
-    "Angami",
-    "Ao",
-    "Chakhesang",
-    "Chang",
-    "Khiamniungan",
-    "Konyak",
-    "Lotha",
-    "Phom",
-    "Pochury",
-    "Rengma",
-    "Sangtam",
-    "Sumi",
-    "Yimchunger",
-    "Zeliang",
-  ];
+  // Derived tribes now fetched from backend based on selected country/state
 
   const changeParam = (key: string, value: string) => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(key, value); else next.delete(key);
     if (key !== "page") next.delete("page");
-    if (key === "country") next.delete("state");
+    if (key === "country") {
+      next.delete("state");
+      next.delete("tribe");
+      next.delete("village");
+    }
+    if (key === "state") {
+      next.delete("tribe");
+      next.delete("village");
+    }
+    if (key === "tribe") {
+      next.delete("village");
+    }
     setSearchParams(next, { replace: true });
   };
 
@@ -136,7 +136,61 @@ const Explore = () => {
       }
     })();
     return () => { active = false; };
-  }, [tribe, category, country, stateRegion]);
+  }, [tribe, category, country, stateRegion, village]);
+
+  // Fetch tribes when country/state change
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setTribesLoading(true);
+      try {
+        // Reset existing when no country or state
+        if (!country || !stateRegion) {
+          if (active) setTribeOptions([]);
+          return;
+        }
+        const qs = new URLSearchParams();
+        qs.set("country", country);
+        qs.set("state", stateRegion);
+        const res = await fetch(`/api/submissions/tribes?${qs.toString()}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.errors?.[0]?.msg || "Failed to load tribes");
+        if (active) setTribeOptions(Array.isArray(data) ? data : []);
+      } catch (_e) {
+        if (active) setTribeOptions([]);
+      } finally {
+        if (active) setTribesLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [country, stateRegion]);
+
+  // Fetch villages when tribe (and optionally country/state) change
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setVillagesLoading(true);
+      try {
+        if (!tribe) {
+          if (active) setVillageOptions([]);
+          return;
+        }
+        const qs = new URLSearchParams();
+        qs.set("tribe", tribe);
+        if (country) qs.set("country", country);
+        if (stateRegion) qs.set("state", stateRegion);
+        const res = await fetch(`/api/submissions/villages?${qs.toString()}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.errors?.[0]?.msg || "Failed to load villages");
+        if (active) setVillageOptions(Array.isArray(data) ? data : []);
+      } catch (_e) {
+        if (active) setVillageOptions([]);
+      } finally {
+        if (active) setVillagesLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [tribe, country, stateRegion]);
 
   const filtered = useMemo(() => {
     let arr = items.slice();
@@ -245,24 +299,52 @@ const Explore = () => {
               </Select>
             </div>
             <div>
-              <Select value={tribe} onValueChange={(v) => changeParam("tribe", v)}>
+              <Select
+                value={tribe}
+                onValueChange={(v) => changeParam("tribe", v)}
+                disabled={!country || !stateRegion || tribesLoading || tribeOptions.length === 0}
+              >
                 <SelectTrigger aria-label="Tribe">
-                  <SelectValue placeholder="Tribe" />
+                  <SelectValue placeholder={
+                    !country || !stateRegion ? "Select country and state first" :
+                    tribesLoading ? "Loading tribes…" :
+                    tribeOptions.length === 0 ? "No tribes available" : "Tribe"
+                  } />
                 </SelectTrigger>
                 <SelectContent>
-                  {tribes.map((t) => (
-                    <SelectItem key={t} value={t.toLowerCase()}>{t}</SelectItem>
-                  ))}
+                  {tribeOptions.length > 0 ? (
+                    tribeOptions.map((t) => (
+                      <SelectItem key={t} value={String(t).toLowerCase()}>{t}</SelectItem>
+                    ))
+                  ) : (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">No tribes available</div>
+                  )}
                 </SelectContent>
               </Select>
             </div>
-            <div className="min-w-[160px]">
-              <Input
+            <div>
+              <Select
                 value={village}
-                onChange={(e) => changeParam("village", e.target.value)}
-                placeholder="Village"
-                aria-label="Village"
-              />
+                onValueChange={(v) => changeParam("village", v)}
+                disabled={!tribe || villagesLoading || villageOptions.length === 0}
+              >
+                <SelectTrigger aria-label="Village">
+                  <SelectValue placeholder={
+                    !tribe ? "Select tribe first" :
+                    villagesLoading ? "Loading villages…" :
+                    villageOptions.length === 0 ? "No villages available" : "Village"
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  {villageOptions.length > 0 ? (
+                    villageOptions.map((v) => (
+                      <SelectItem key={v} value={String(v)}>{v}</SelectItem>
+                    ))
+                  ) : (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">No villages available</div>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setSearchParams({}, { replace: true })}>Reset</Button>

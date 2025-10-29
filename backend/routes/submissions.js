@@ -101,6 +101,38 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Distinct tribes available for filters
+router.get('/tribes', async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.country) filter.country = req.query.country;
+    if (req.query.state) filter.state = req.query.state;
+    // Consider only approved for public listing
+    filter.status = 'approved';
+    const tribes = await Submission.distinct('tribe', filter);
+    const cleaned = tribes.filter(Boolean).map((t) => String(t));
+    res.json(cleaned);
+  } catch (e) {
+    res.status(500).json({ errors: [{ msg: 'Server error' }] });
+  }
+});
+
+// Distinct villages available for a given tribe (and optional country/state)
+router.get('/villages', async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.tribe) filter.tribe = String(req.query.tribe).toLowerCase();
+    if (req.query.country) filter.country = req.query.country;
+    if (req.query.state) filter.state = req.query.state;
+    filter.status = 'approved';
+    const villages = await Submission.distinct('village', filter);
+    const cleaned = villages.filter(Boolean).map((v) => String(v));
+    res.json(cleaned);
+  } catch (e) {
+    res.status(500).json({ errors: [{ msg: 'Server error' }] });
+  }
+});
+
 // Allow the authenticated user to update their own submission by id
 router.patch(
   '/:id',
