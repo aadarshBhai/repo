@@ -238,21 +238,22 @@ const Explore = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex-1 py-8 px-4">
+    <div className="min-h-screen flex flex-col font-sans leading-relaxed">
+      <div className="flex-1 py-6 md:py-8 px-4">
         <div className="container mx-auto max-w-7xl">
-          <div className="mb-6 flex flex-wrap items-center gap-3">
+          <div className="mb-6 flex flex-wrap items-center gap-3 md:gap-4">
             <div className="basis-full sm:basis-auto flex-1 min-w-[220px]">
               <Input
                 value={q}
                 onChange={(e) => changeParam("q", e.target.value)}
                 placeholder="Search by title, tribe, or keyword…"
                 aria-label="Search"
+                className="w-full"
               />
             </div>
-            <div>
+            <div className="basis-[160px] grow sm:grow-0">
               <Select value={sort} onValueChange={(v) => changeParam("sort", v)}>
-                <SelectTrigger aria-label="Sort by">
+                <SelectTrigger aria-label="Sort by" className="w-full">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -262,9 +263,9 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="basis-[180px] grow sm:grow-0">
               <Select value={category} onValueChange={(v) => changeParam("category", v)}>
-                <SelectTrigger aria-label="Category">
+                <SelectTrigger aria-label="Category" className="w-full">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -274,9 +275,9 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="basis-[180px] grow sm:grow-0">
               <Select value={country} onValueChange={(v) => changeParam("country", v)}>
-                <SelectTrigger aria-label="Country">
+                <SelectTrigger aria-label="Country" className="w-full">
                   <SelectValue placeholder="Country" />
                 </SelectTrigger>
                 <SelectContent>
@@ -286,9 +287,9 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="basis-[200px] grow sm:grow-0">
               <Select value={stateRegion} onValueChange={(v) => changeParam("state", v)} disabled={!country}>
-                <SelectTrigger aria-label="State or Region">
+                <SelectTrigger aria-label="State or Region" className="w-full">
                   <SelectValue placeholder={country ? "State/Region" : "Select country first"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -298,13 +299,13 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="basis-[180px] grow sm:grow-0">
               <Select
                 value={tribe}
                 onValueChange={(v) => changeParam("tribe", v)}
                 disabled={!country || !stateRegion || tribesLoading || tribeOptions.length === 0}
               >
-                <SelectTrigger aria-label="Tribe">
+                <SelectTrigger aria-label="Tribe" className="w-full">
                   <SelectValue placeholder={
                     !country || !stateRegion ? "Select country and state first" :
                     tribesLoading ? "Loading tribes…" :
@@ -322,13 +323,13 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="basis-[180px] grow sm:grow-0">
               <Select
                 value={village}
                 onValueChange={(v) => changeParam("village", v)}
                 disabled={!tribe || villagesLoading || villageOptions.length === 0}
               >
-                <SelectTrigger aria-label="Village">
+                <SelectTrigger aria-label="Village" className="w-full">
                   <SelectValue placeholder={
                     !tribe ? "Select tribe first" :
                     villagesLoading ? "Loading villages…" :
@@ -346,8 +347,8 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setSearchParams({}, { replace: true })}>Reset</Button>
+            <div className="flex gap-2 basis-full sm:basis-auto">
+              <Button className="w-full sm:w-auto" variant="outline" onClick={() => setSearchParams({}, { replace: true })}>Reset</Button>
             </div>
           </div>
 

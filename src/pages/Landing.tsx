@@ -16,7 +16,7 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden">
+    <div className="min-h-screen flex flex-col overflow-x-hidden font-sans leading-relaxed">
       <Navigation />
 
       {/* Hero Section */}
@@ -266,7 +266,7 @@ const Landing = () => {
               { src: 'https://images.unsplash.com/photo-1511207538751-1883b1e0f838?q=80&w=1200&auto=format&fit=crop', caption: 'Mountain village landscape', tags: ['landscape','village'] },
             ].map((g, i) => (
               <figure key={i} className="group relative overflow-hidden rounded-xl border bg-background">
-                <img src={g.src} alt={g.caption} className="w-full h-48 md:h-52 object-cover group-hover:scale-[1.02] transition-transform" />
+                <img src={g.src} alt={g.caption} loading="lazy" className="w-full h-48 md:h-52 object-cover group-hover:scale-[1.02] transition-transform" />
                 <figcaption className="p-3">
                   <p className="text-sm text-foreground/90">{g.caption}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
