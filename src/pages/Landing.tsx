@@ -77,35 +77,6 @@ const Landing = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background/40 to-transparent" />
       </section>
 
-      {/* About preview */}
-      <section className="relative py-10 md:py-14 bg-background border-t border-border/60">
-        <div className="relative w-full px-4 md:px-6">
-          <div className="max-w-5xl">
-            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">About Us</h2>
-            <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl">
-              This Heritage Repository is an ethical, consent-based digital archive dedicated to preserving and sharing indigenous cultural heritage through community-led documentation and cultural care.
-            </p>
-            <div className="mt-5">
-              <Button asChild size="sm"><Link to="/about-us">Learn More</Link></Button>
-            </div>
-          </div>
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
-            <div>
-              <h3 className="text-lg md:text-xl font-semibold">Our Mission</h3>
-              <p className="text-sm md:text-base text-foreground/80 mt-2 max-w-prose">
-                Build an accessible, community-informed archive that honors traditional knowledge and empowers continuity with authentic resources.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg md:text-xl font-semibold">Our Approach</h3>
-              <p className="text-sm md:text-base text-foreground/80 mt-2 max-w-prose">
-                Work closely with community members, elders, and cultural practitioners to ensure respectful representation and appropriate sensitivity.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* How It Works */}
       <section ref={howRef} className="relative py-16 md:py-24 bg-background border-t border-border/60">
         <div className="absolute inset-0 bg-tribal-shawl/5" />
