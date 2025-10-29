@@ -9,7 +9,6 @@ import { ArrowDown, PlayCircle, Map, Sparkles } from "lucide-react";
 const Landing = () => {
   const howRef = useRef<HTMLDivElement | null>(null);
   const roadmapRef = useRef<HTMLDivElement | null>(null);
-  const inspireRef = useRef<HTMLDivElement | null>(null);
   const visualsRef = useRef<HTMLDivElement | null>(null);
 
   const scrollTo = (ref: React.RefObject<HTMLDivElement>) => {
@@ -82,136 +81,118 @@ const Landing = () => {
         <div className="absolute inset-0 bg-tribal-shawl/5" />
         <div className="relative max-w-6xl mx-auto px-4">
           <div className="mb-12 text-center">
-            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">How to use the Repository</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">How to Use the Repository</h2>
             <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
               Discover, contribute, and steward cultural knowledge in an ethical, consent-first way.
             </p>
+            <p className="mt-2 text-xs md:text-sm text-muted-foreground max-w-2xl mx-auto">
+              Follow these three simple steps to explore and participate responsibly.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-5 md:gap-7">
-            <div className="group rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur card-texture border hover:shadow-xl hover:-translate-y-0.5 hover:scale-[1.01] transition-transform duration-200">
-              <div className="flex items-center gap-3 text-primary mb-3">
+          <ol className="space-y-6 md:space-y-8 max-w-3xl mx-auto">
+            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+              <div className="flex items-center gap-3 text-primary mb-2">
                 <PlayCircle className="h-6 w-6" />
-                <h3 className="text-lg md:text-xl font-semibold">Explore & Learn</h3>
+                <h3 className="text-lg md:text-xl font-semibold">1. Explore & Learn</h3>
               </div>
-              <p className="text-xs md:text-sm text-muted-foreground">
-                Browse categorized archives, stories, and media with clear consent levels. Save items to your collection.
-              </p>
-            </div>
+              <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
+                <li>Browse folktales, songs, rituals, and artifacts contributed by communities.</li>
+                <li>Each entry displays its consent level — Public, Restricted, or Confidential.</li>
+                <li>Access detailed descriptions, listen to audio clips, or view cultural videos.</li>
+                <li>Save your favorite stories to your collection for future learning.</li>
+              </ul>
+              <p className="mt-3 text-xs md:text-sm text-foreground/80">🟢 Respect each item’s consent tier — not all content is meant for public use.</p>
+            </li>
 
-            <div className="group rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur card-texture border hover:shadow-xl hover:-translate-y-0.5 hover:scale-[1.01] transition-transform duration-200">
-              <div className="flex items-center gap-3 text-primary mb-3">
+            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+              <div className="flex items-center gap-3 text-primary mb-2">
                 <Sparkles className="h-6 w-6" />
-                <h3 className="text-lg md:text-xl font-semibold">Contribute Respectfully</h3>
+                <h3 className="text-lg md:text-xl font-semibold">2. Contribute Respectfully</h3>
               </div>
-              <p className="text-xs md:text-sm text-muted-foreground">
-                Upload with community consent, metadata, and access tiers to protect sensitive knowledge.
-              </p>
-            </div>
+              <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
+                <li>Share your own folktales, folksongs, dances, rituals, or artifacts as text, image, audio, or video.</li>
+                <li>Ensure you have clear community consent before uploading.</li>
+                <li>Fill in all required metadata: category, tribe, region, and a short description.</li>
+                <li>Upload a consent document and select the right sensitivity level (Public / Restricted / Confidential).</li>
+              </ul>
+              <p className="mt-3 text-xs md:text-sm text-foreground/80">🟢 Submissions are reviewed by community elders and cultural experts before publication.</p>
+            </li>
 
-            <div className="group rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur card-texture border hover:shadow-xl transition-all">
-              <div className="flex items-center gap-3 text-primary mb-3">
+            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+              <div className="flex items-center gap-3 text-primary mb-2">
                 <Map className="h-6 w-6" />
-                <h3 className="text-lg md:text-xl font-semibold">Follow Roadmaps</h3>
+                <h3 className="text-lg md:text-xl font-semibold">3. Follow the Roadmap</h3>
               </div>
-              <p className="text-sm md:text-[0.95rem] text-muted-foreground">
-                Learn through guided paths built with elders and experts, from language to craft to rituals.
-              </p>
-            </div>
-          </div>
+              <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
+                <li>Collection: Gathering stories and materials with consent.</li>
+                <li>Verification: Elders and scholars ensure accuracy and sensitivity.</li>
+                <li>Publication: Approved items are published with tiered access.</li>
+              </ul>
+              <p className="mt-3 text-xs md:text-sm text-foreground/80">You can explore learning roadmaps built by experts and culture bearers to understand traditions deeply.</p>
+              <p className="mt-1 text-xs md:text-sm text-foreground/80">🟢 This ensures every shared story remains authentic and ethically preserved.</p>
+            </li>
+          </ol>
 
-          <div className="mt-10 text-center">
-            <Button variant="default" size="sm" onClick={() => scrollTo(roadmapRef)}>
-              View Learning Roadmaps
+          <div className="mt-10 md:mt-12 text-center flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Button asChild size="sm">
+              <Link to="/explore">Start Exploring</Link>
+            </Button>
+            <Button asChild variant="secondary" size="sm">
+              <Link to="/upload">Contribute a Story</Link>
             </Button>
           </div>
+
+          
         </div>
       </section>
 
       {/* Roadmaps */}
       <section ref={roadmapRef} className="relative py-16 md:py-24 bg-muted/3 border-t border-border/60">
         <div className="relative max-w-6xl mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">Roadmaps</h2>
-            <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
-              Structured journey from collection to publication with cultural verification.
-            </p>
+          <div className="mb-8 md:mb-12 text-center">
+            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">Heritage Repository Roadmap</h2>
+            <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">A clear path from collection to publication</p>
+            <p className="mt-2 text-xs md:text-sm text-muted-foreground max-w-3xl mx-auto">Every cultural submission follows a transparent, consent-based process to ensure authenticity and respect.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-5 md:gap-7">
-            {[{
-              key: 'collection',
-              title: 'Collection',
-              img: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=1200&auto=format&fit=crop',
-              caption: 'Document stories, songs, artifacts with community consent.'
-            },{
-              key: 'verification',
-              title: 'Verification',
-              img: 'https://images.unsplash.com/photo-1524230572899-a752b3835840?q=80&w=1200&auto=format&fit=crop',
-              caption: 'Elders and scholars review for accuracy and sensitivity.'
-            },{
-              key: 'publication',
-              title: 'Publication',
-              img: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=1200&auto=format&fit=crop',
-              caption: 'Publish with tiered access: public, restricted, confidential.'
-            }].map((r) => (
-              <div key={r.key} className="rounded-xl overflow-hidden border bg-card/80 hover:shadow-xl transition-shadow">
-                <div className="aspect-[16/9] w-full overflow-hidden">
-                  <img src={r.img} alt={r.title} className="w-full h-full object-cover" />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-base md:text-lg font-semibold">{r.title}</h3>
-                  <p className="text-xs md:text-sm text-muted-foreground mt-1">{r.caption}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <div className="max-w-3xl mx-auto">
+            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+              <h3 className="text-lg md:text-xl font-semibold">1️⃣ Collection</h3>
+              <p className="mt-2 text-sm md:text-base text-foreground/85">Community members document folktales, songs, dances, and artifacts — always with <strong>informed consent</strong> from the knowledge holders.</p>
+              <p className="mt-2 text-xs md:text-sm text-foreground/80">🟢 <em>Goal: Preserve stories responsibly.</em></p>
+            </div>
 
-          <div className="mt-8 md:mt-10 text-center">
-            <p className="text-sm md:text-base text-foreground/80 max-w-3xl mx-auto">
-              You can upload folktales, folksongs, folk dances, ritual practices, and material culture (e.g., tools, garments, craft objects) as text, images, audio, or video. Each submission undergoes cultural verification and is assigned an appropriate sensitivity level before publication.
-            </p>
-          </div>
+            <div className="my-3 md:my-4 text-center" aria-hidden>⬇️</div>
 
-          <div className="mt-12 text-center">
-            <Button variant="outline" size="sm" onClick={() => scrollTo(inspireRef)}>Get Inspired</Button>
-          </div>
-        </div>
-      </section>
+            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+              <h3 className="text-lg md:text-xl font-semibold">2️⃣ Verification</h3>
+              <p className="mt-2 text-sm md:text-base text-foreground/85"><strong>Elders, scholars, and cultural experts</strong> carefully review each submission for <strong>accuracy, sensitivity, and cultural integrity.</strong></p>
+              <p className="mt-2 text-xs md:text-sm text-foreground/80">🟢 <em>Goal: Ensure authenticity and ethical handling.</em></p>
+            </div>
 
-      {/* Motivation / Inspiration */}
-      <section ref={inspireRef} className="relative py-16 md:py-24 bg-background border-t border-border/60">
-        <div className="absolute inset-0 pattern-weave opacity-[.06]" />
-        <div className="relative max-w-5xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">Why this matters</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-5 md:gap-7">
-            {[
-              {
-                q: "Knowledge lives in people. Archives should honor consent and context.",
-                a: "Every contribution respects the community’s voice and choice.",
-              },
-              {
-                q: "Preservation is a living practice.",
-                a: "Roadmaps keep traditions teachable and accessible.",
-              },
-              {
-                q: "Stories carry identity.",
-                a: "Explore oral histories that uplift memory and belonging.",
-              },
-            ].map((item) => (
-              <blockquote key={item.q} className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
-                <p className="text-sm md:text-base leading-relaxed">“{item.q}”</p>
-                <footer className="mt-3 md:mt-4 text-xs md:text-sm text-muted-foreground">{item.a}</footer>
-              </blockquote>
-            ))}
-          </div>
+            <div className="my-3 md:my-4 text-center" aria-hidden>⬇️</div>
 
-          <div className="mt-12 text-center">
-            <Button onClick={() => scrollTo(visualsRef)} variant="default" size="sm">
-              See Visual Stories
-            </Button>
+            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border">
+              <h3 className="text-lg md:text-xl font-semibold">3️⃣ Publication</h3>
+              <p className="mt-2 text-sm md:text-base text-foreground/85">Once verified, the content is published in the Repository with <strong>tiered access:</strong></p>
+              <ul className="mt-2 list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
+                <li>🟢 <em>Public</em> → Open for all viewers</li>
+                <li>🟠 <em>Restricted</em> → Limited to researchers/learners</li>
+                <li>🔴 <em>Confidential</em> → Accessible only to designated custodians</li>
+              </ul>
+              <p className="mt-2 text-xs md:text-sm text-foreground/80">🟢 <em>Goal: Protect sacred knowledge while promoting education and continuity.</em></p>
+            </div>
+
+            <div className="mt-8 md:mt-10">
+              <p className="text-xs md:text-sm text-muted-foreground">Visual direction: Collection ➜ Verification ➜ Publication</p>
+              <p className="text-xs md:text-sm text-muted-foreground">Or with icons: 📥 Collection → 🧾 Verification → 🌐 Publication</p>
+            </div>
+
+            <blockquote className="mt-8 md:mt-10 border-l-2 pl-4 text-sm md:text-base text-foreground/85">
+              <p className="font-medium">“From Collection to Continuity”</p>
+              <p className="text-muted-foreground">Every cultural story travels through this ethical roadmap before it becomes part of our shared archive.</p>
+            </blockquote>
           </div>
         </div>
       </section>
@@ -221,7 +202,7 @@ const Landing = () => {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-background to-background" />
         <div className="relative max-w-6xl mx-auto px-4">
           <div className="mb-12 text-center">
-            <h2 className="text-2xl md:text-3xl font-bold heading-accent inline-block">Scenes from the Archive</h2>
+            <h2 className="text-2xl md:text-3xl font-bold heading-accent inline-block">Photos from the Archive</h2>
             <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
               A glimpse of real visual stories. Captions and tags help contextualize each photo.
             </p>
