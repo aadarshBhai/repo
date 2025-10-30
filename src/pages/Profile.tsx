@@ -22,6 +22,17 @@ const Profile = () => {
   const [editDescription, setEditDescription] = useState("");
   const [editText, setEditText] = useState("");
   const [editContentUrl, setEditContentUrl] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [contributors, setContributors] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [requests, setRequests] = useState<any[]>([]);
+  const categories = [
+    "Folktales",
+    "Folkdance",
+    "Folksongs",
+    "Material Culture",
+    "Ritual Practices",
+  ];
 
   const fetchMine = async () => {
     try {
@@ -112,9 +123,99 @@ const Profile = () => {
     }
   };
 
+  const fetchContributors = async () => {
+    try {
+      setSearching(true);
+      setContributors([]);
+      const category = selectedCategory.trim();
+      if (!category) {
+        toast({ title: 'Choose a category', variant: 'destructive' });
+        return;
+      }
+      const res = await fetch(`/api/collab/contributors?category=${encodeURIComponent(category.toLowerCase())}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.errors?.[0]?.msg || 'Failed to search');
+      setContributors(Array.isArray(data) ? data : []);
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Search failed', variant: 'destructive' });
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const sendRequest = async (recipientId: string, category: string) => {
+    try {
+      if (!isAuthenticated || !token) {
+        toast({ title: 'Login required', description: 'Please login', variant: 'destructive' });
+        return;
+      }
+      const res = await fetch('/api/collab/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ recipientId, category }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.errors?.[0]?.msg || 'Failed to send');
+      toast({ title: 'Collaboration request sent' });
+      fetchRequests();
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to send', variant: 'destructive' });
+    }
+  };
+
+  const fetchRequests = async () => {
+    try {
+      if (!isAuthenticated || !token) return;
+      const res = await fetch('/api/collab/requests', { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.errors?.[0]?.msg || 'Failed to load requests');
+      setRequests(Array.isArray(data) ? data : []);
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to load requests', variant: 'destructive' });
+    }
+  };
+
+  const respondRequest = async (id: string, action: 'accept' | 'reject') => {
+    try {
+      if (!isAuthenticated || !token) return;
+      const res = await fetch(`/api/collab/requests/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.errors?.[0]?.msg || 'Failed to update');
+      toast({ title: action === 'accept' ? 'Request accepted' : 'Request rejected' });
+      fetchRequests();
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to update', variant: 'destructive' });
+    }
+  };
+
+  const canChatAndNavigate = async (otherUserId: string) => {
+    try {
+      if (!isAuthenticated || !token) {
+        toast({ title: 'Login required', description: 'Please login', variant: 'destructive' });
+        return;
+      }
+      const res = await fetch(`/api/collab/can-chat/${otherUserId}`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.errors?.[0]?.msg || 'Failed to check');
+      if (data?.allowed) {
+        // Navigate to chat route (to be implemented separately)
+        navigate(`/chat/${otherUserId}`);
+      } else {
+        toast({ title: 'Chat not available', description: 'Collaboration must be accepted first', variant: 'destructive' });
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to check', variant: 'destructive' });
+    }
+  };
+
   useEffect(() => {
     fetchMine();
     fetchProfile();
+    fetchRequests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, token]);
 
@@ -157,6 +258,94 @@ const Profile = () => {
               </CardContent>
             </Card>
           )}
+
+          <Card className="card-texture mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl">Find Collaborators by Category</CardTitle>
+              <CardDescription>Search users who uploaded in the same archive category</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row gap-3 items-start md:items-end">
+                <div className="w-full md:w-64">
+                  <Label htmlFor="category">Category</Label>
+                  <select
+                    id="category"
+                    className="mt-1 w-full rounded border bg-background p-2"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Button onClick={fetchContributors} disabled={searching}>
+                    {searching ? 'Searching...' : 'Search'}
+                  </Button>
+                </div>
+              </div>
+
+              {contributors.length > 0 && (
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {contributors.map((u) => (
+                    <Card key={u.id} className="card-texture">
+                      <CardHeader>
+                        <CardTitle className="text-xl line-clamp-1">{u.name}</CardTitle>
+                        <CardDescription>Category: {u.category}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" onClick={() => sendRequest(u.id, u.category)}>Send Collaboration</Button>
+                          <Button size="sm" variant="secondary" onClick={() => canChatAndNavigate(u.id)}>Chat</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="card-texture mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl">Collaboration Requests</CardTitle>
+              <CardDescription>Manage incoming and outgoing requests</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {requests.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No collaboration requests yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {requests.map((r) => {
+                    const isRecipient = profile && String(r.recipientId) === String(profile.id);
+                    return (
+                      <div key={r.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 rounded border p-3">
+                        <div className="text-sm">
+                          <div><span className="text-muted-foreground">From:</span> {r.requesterName}</div>
+                          <div><span className="text-muted-foreground">To:</span> {r.recipientName}</div>
+                          <div><span className="text-muted-foreground">Category:</span> {r.category}</div>
+                          <div><span className="text-muted-foreground">Status:</span> {r.status}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="secondary" onClick={() => canChatAndNavigate(isRecipient ? r.requesterId : r.recipientId)}>
+                            Chat
+                          </Button>
+                          {isRecipient && r.status === 'pending' && (
+                            <>
+                              <Button size="sm" onClick={() => respondRequest(r.id, 'accept')}>Accept</Button>
+                              <Button size="sm" variant="destructive" onClick={() => respondRequest(r.id, 'reject')}>Reject</Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {loading ? (
             <p className="text-muted-foreground">Loading...</p>

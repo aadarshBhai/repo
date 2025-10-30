@@ -96,12 +96,8 @@ const Landing = () => {
                 <h3 className="text-lg md:text-xl font-semibold">1. Explore & Learn</h3>
               </div>
               <div className="hidden md:block absolute right-4 top-4">
-                <img
-                  src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop"
-                  alt="Explore archives"
-                  className="w-28 h-20 rounded-lg object-cover border"
-                  loading="lazy"
-                />
+            
+          
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
                 <li>Browse Folksongs, Folktales, Ritual Practices and Material Culture contributed by communities.</li>
@@ -117,12 +113,8 @@ const Landing = () => {
                 <h3 className="text-lg md:text-xl font-semibold">2. Contribute Respectfully</h3>
               </div>
               <div className="hidden md:block absolute right-4 top-4">
-                <img
-                  src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop"
-                  alt="Contribute respectfully"
-                  className="w-28 h-20 rounded-lg object-cover border"
-                  loading="lazy"
-                />
+              
+  
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
                 <li>Share your own Folksongs, Folktales, Ritual Practices and Material Culture as text, image, audio, or video.</li>
@@ -138,12 +130,8 @@ const Landing = () => {
                 <h3 className="text-lg md:text-xl font-semibold">3. Follow the Roadmap</h3>
               </div>
               <div className="hidden md:block absolute right-4 top-4">
-                <img
-                  src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=800&auto=format&fit=crop"
-                  alt="Roadmap flow"
-                  className="w-28 h-20 rounded-lg object-cover border"
-                  loading="lazy"
-                />
+              
+              
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
                 <li>Collection: Gathering Folk Stories and Material Culture with consent.</li>

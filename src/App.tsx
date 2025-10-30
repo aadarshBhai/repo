@@ -20,6 +20,7 @@ import Profile from "./pages/Profile";
 import About from "./pages/About";
 import RequireAuth from "./components/RequireAuth";
 import { AuthProvider } from "./context/AuthContext";
+import Chat from "./pages/Chat";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
             <Route path="/category/:categoryName" element={<><Navigation /><Category /></>} />
             <Route path="/profile" element={<RequireAuth><><Navigation /><Profile /></></RequireAuth>} />
+            <Route path="/chat/:otherUserId" element={<RequireAuth><><Navigation /><Chat /></></RequireAuth>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
