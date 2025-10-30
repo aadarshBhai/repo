@@ -8,10 +8,12 @@ import Footer from "@/components/Footer";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { mediaSrc } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { token, isAuthenticated, logout: ctxLogout } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any | null>(null);
@@ -24,8 +26,7 @@ const Profile = () => {
   const fetchMine = async () => {
     try {
       setLoading(true);
-      const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-      if (!token) {
+      if (!isAuthenticated || !token) {
         toast({ title: 'Login required', description: 'Please login to view your uploads', variant: 'destructive' });
         return;
       }
@@ -47,9 +48,7 @@ const Profile = () => {
   };
 
   const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('userToken');
-    }
+    ctxLogout();
     toast({ title: 'Logged out' });
     navigate('/');
   };
@@ -72,8 +71,7 @@ const Profile = () => {
 
   const saveEdit = async (id: string, type: string) => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-      if (!token) {
+      if (!isAuthenticated || !token) {
         toast({ title: 'Login required', description: 'Please login', variant: 'destructive' });
         return;
       }
@@ -103,8 +101,7 @@ const Profile = () => {
 
   const fetchProfile = async () => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-      if (!token) return;
+      if (!isAuthenticated || !token) return;
       const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
       if (res.status === 401) return;
       const data = await res.json();
@@ -118,7 +115,8 @@ const Profile = () => {
   useEffect(() => {
     fetchMine();
     fetchProfile();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, token]);
 
   return (
     <div className="min-h-screen flex flex-col">

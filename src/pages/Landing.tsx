@@ -110,7 +110,7 @@ const Landing = () => {
                 <li>Access detailed descriptions, listen to audio clips, or view cultural videos.</li>
                 <li>Save your favorite stories to your collection for future learning.</li>
               </ul>
-              <p className="mt-3 text-xs md:text-sm text-foreground/80">🟢 Respect each item’s consent tier — not all content is meant for public use.</p>
+              <p className="mt-3 text-xs md:text-sm text-foreground/80"> Respect each item’s consent tier — not all content is meant for public use.</p>
             </li>
 
             <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
@@ -132,7 +132,7 @@ const Landing = () => {
                 <li>Fill in all required metadata: category, tribe, region, and a short description.</li>
                 <li>Upload a consent document and select the right sensitivity level (Public / Restricted / Confidential).</li>
               </ul>
-              <p className="mt-3 text-xs md:text-sm text-foreground/80">🟢 Submissions are reviewed by community elders and cultural experts before publication.</p>
+              <p className="mt-3 text-xs md:text-sm text-foreground/80">Submissions are reviewed by community elders and cultural experts before publication.</p>
             </li>
 
             <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
@@ -154,7 +154,7 @@ const Landing = () => {
                 <li>Publication: Approved items are published with tiered access.</li>
               </ul>
               <p className="mt-3 text-xs md:text-sm text-foreground/80">You can explore learning roadmaps built by experts and culture bearers to understand traditions deeply.</p>
-              <p className="mt-1 text-xs md:text-sm text-foreground/80">🟢 This ensures every shared story remains authentic and ethically preserved.</p>
+              <p className="mt-1 text-xs md:text-sm text-foreground/80">This ensures every shared story remains authentic and ethically preserved.</p>
             </li>
           </ol>
 
@@ -182,7 +182,7 @@ const Landing = () => {
 
           <div className="max-w-3xl mx-auto">
             <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
-              <h3 className="text-lg md:text-xl font-semibold">1️⃣ Collection</h3>
+              <h3 className="text-lg md:text-xl font-semibold">Collection</h3>
               <div className="hidden md:block absolute right-4 top-4">
                 <img
                   src="https://images.unsplash.com/photo-1510936111840-65e151ad71bb?q=80&w=800&auto=format&fit=crop"
@@ -192,13 +192,13 @@ const Landing = () => {
                 />
               </div>
               <p className="mt-2 text-sm md:text-base text-foreground/85">Community members document folktales, songs, dances, and artifacts — always with <strong>informed consent</strong> from the knowledge holders.</p>
-              <p className="mt-2 text-xs md:text-sm text-foreground/80">🟢 <em>Goal: Preserve stories responsibly.</em></p>
+              <p className="mt-2 text-xs md:text-sm text-foreground/80"> <em>Goal: Preserve stories responsibly.</em></p>
             </div>
 
-            <div className="my-3 md:my-4 text-center" aria-hidden>⬇️</div>
+            <div className="my-3 md:my-4 text-center" aria-hidden>⬇</div>
 
             <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
-              <h3 className="text-lg md:text-xl font-semibold">2️⃣ Verification</h3>
+              <h3 className="text-lg md:text-xl font-semibold">Verification</h3>
               <div className="hidden md:block absolute right-4 top-4">
                 <img
                   src="https://images.unsplash.com/photo-1516383607781-913a19294fd1?q=80&w=800&auto=format&fit=crop"
@@ -208,13 +208,13 @@ const Landing = () => {
                 />
               </div>
               <p className="mt-2 text-sm md:text-base text-foreground/85"><strong>Elders, scholars, and cultural experts</strong> carefully review each submission for <strong>accuracy, sensitivity, and cultural integrity.</strong></p>
-              <p className="mt-2 text-xs md:text-sm text-foreground/80">🟢 <em>Goal: Ensure authenticity and ethical handling.</em></p>
+              <p className="mt-2 text-xs md:text-sm text-foreground/80"> <em>Goal: Ensure authenticity and ethical handling.</em></p>
             </div>
 
-            <div className="my-3 md:my-4 text-center" aria-hidden>⬇️</div>
+            <div className="my-3 md:my-4 text-center" aria-hidden>⬇</div>
 
             <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
-              <h3 className="text-lg md:text-xl font-semibold">3️⃣ Publication</h3>
+              <h3 className="text-lg md:text-xl font-semibold">Publication</h3>
               <div className="hidden md:block absolute right-4 top-4">
                 <img
                   src="https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=800&auto=format&fit=crop"
@@ -225,17 +225,14 @@ const Landing = () => {
               </div>
               <p className="mt-2 text-sm md:text-base text-foreground/85">Once verified, the content is published in the Repository with <strong>tiered access:</strong></p>
               <ul className="mt-2 list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
-                <li>🟢 <em>Public</em> → Open for all viewers</li>
-                <li>🟠 <em>Restricted</em> → Limited to researchers/learners</li>
-                <li>🔴 <em>Confidential</em> → Accessible only to designated custodians</li>
+                <li><em>Public</em> → Open for all viewers</li>
+                <li><em>Restricted</em> → Limited to researchers/learners</li>
+                <li><em>Confidential</em> → Accessible only to designated custodians</li>
               </ul>
-              <p className="mt-2 text-xs md:text-sm text-foreground/80">🟢 <em>Goal: Protect sacred knowledge while promoting education and continuity.</em></p>
+              <p className="mt-2 text-xs md:text-sm text-foreground/80"> <em>Goal: Protect sacred knowledge while promoting education and continuity.</em></p>
             </div>
 
-            <div className="mt-8 md:mt-10">
-              <p className="text-xs md:text-sm text-muted-foreground">Visual direction: Collection ➜ Verification ➜ Publication</p>
-              <p className="text-xs md:text-sm text-muted-foreground">Or with icons: 📥 Collection → 🧾 Verification → 🌐 Publication</p>
-            </div>
+          
 
             <blockquote className="mt-8 md:mt-10 border-l-2 pl-4 text-sm md:text-base text-foreground/85">
               <p className="font-medium">“From Collection to Continuity”</p>
@@ -258,12 +255,12 @@ const Landing = () => {
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {[
-              { src: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=1200&auto=format&fit=crop', caption: 'Community gathering at dusk', tags: ['community','ritual'] },
-              { src: 'https://images.unsplash.com/photo-1511295742362-92c96b1a37b6?q=80&w=1200&auto=format&fit=crop', caption: 'Handwoven patterns', tags: ['weaving','material-culture'] },
-              { src: 'https://images.unsplash.com/photo-1558981001-5cbe7f3f2bdc?q=80&w=1200&auto=format&fit=crop', caption: 'Oral history recording', tags: ['oral-history','audio'] },
-              { src: 'https://images.unsplash.com/photo-1531177071272-4c2b94387586?q=80&w=1200&auto=format&fit=crop', caption: 'Traditional dance practice', tags: ['dance'] },
-              { src: 'https://images.unsplash.com/photo-1532946332-4f9b8449be3f?q=80&w=1200&auto=format&fit=crop', caption: 'Craft tools and artifacts', tags: ['tools','craft'] },
-              { src: 'https://images.unsplash.com/photo-1511207538751-1883b1e0f838?q=80&w=1200&auto=format&fit=crop', caption: 'Mountain village landscape', tags: ['landscape','village'] },
+              { src: '/rituals.jpg', caption: 'Community gathering at dusk', tags: ['community','ritual'] },
+              { src: '/material.jpg', caption: 'Handwoven patterns', tags: ['weaving','material-culture'] },
+              { src: '/folksongs.jpg', caption: 'Oral history recording', tags: ['oral-history','audio'] },
+              { src: '/folkdances.jpg', caption: 'Traditional dance practice', tags: ['dance'] },
+              { src: '/tools.jpg', caption: 'Craft tools and artifacts', tags: ['tools','craft'] },
+              { src: '/folktales.jpg', caption: 'Mountain village landscape', tags: ['landscape','village'] },
             ].map((g, i) => (
               <figure key={i} className="group relative overflow-hidden rounded-xl border bg-background">
                 <img src={g.src} alt={g.caption} loading="lazy" className="w-full h-48 md:h-52 object-cover group-hover:scale-[1.02] transition-transform" />

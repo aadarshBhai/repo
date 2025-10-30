@@ -12,15 +12,31 @@ const SignUp = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const validatePassword = (p: string): string | null => {
+    const meetsLength = p.length >= 8;
+    const hasUpper = /[A-Z]/.test(p);
+    const hasLower = /[a-z]/.test(p);
+    const hasSpecial = /[^A-Za-z0-9]/.test(p);
+    if (!meetsLength || !hasUpper || !hasLower || !hasSpecial) {
+      return "Password must be at least 8 characters and include uppercase, lowercase, and a special character.";
+    }
+    return null;
+  };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      const err = validatePassword(password);
+      if (err) {
+        setPasswordError(err);
+        return;
+      }
       // Simulate successful signup. Replace with real API as needed.
       const fakeToken = `token_${Date.now()}`;
-      localStorage.setItem('userToken', fakeToken);
       login(fakeToken);
       navigate('/profile', { replace: true });
     } finally {
@@ -48,7 +64,28 @@ const SignUp = () => {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" />
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPassword(val);
+                  const err = validatePassword(val);
+                  setPasswordError(err);
+                }}
+                required
+                placeholder="••••••••"
+                aria-invalid={!!passwordError}
+                pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}"
+                title="At least 8 characters, including uppercase, lowercase, and a special character"
+              />
+              {passwordError && (
+                <p className="text-xs text-red-600">{passwordError}</p>
+              )}
+              {!passwordError && (
+                <p className="text-xs text-muted-foreground">At least 8 characters, include uppercase, lowercase, and a special character.</p>
+              )}
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Creating account…' : 'Sign Up'}

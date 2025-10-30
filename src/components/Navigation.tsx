@@ -1,34 +1,17 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    const syncAuth = () => {
-      const ut = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-      setLoggedIn(Boolean(ut));
-    };
-    // Initialize on mount and on route changes (e.g., after login redirect)
-    syncAuth();
-    // Listen for auth changes across tabs/windows
-    const handler = (e: StorageEvent) => {
-      if (e.key === 'userToken') {
-        syncAuth();
-      }
-    };
-    if (typeof window !== 'undefined') {
-      window.addEventListener('storage', handler);
-    }
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('storage', handler);
-      }
-    };
-  }, [location.pathname]);
+    setLoggedIn(isAuthenticated);
+  }, [isAuthenticated, location.pathname]);
 
   
 
@@ -40,10 +23,7 @@ const Navigation = () => {
   ];
 
   const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('userToken');
-      localStorage.removeItem('adminToken');
-    }
+    logout();
     setLoggedIn(false);
     navigate('/');
   };

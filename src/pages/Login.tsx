@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Login = () => {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +34,8 @@ const Login = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.errors?.[0]?.msg || 'Login failed');
-      if (data && data.token && typeof window !== 'undefined') {
-        localStorage.setItem('userToken', data.token);
+      if (data && data.token) {
+        login(data.token);
       }
       navigate("/explore");
     } catch (err: any) {

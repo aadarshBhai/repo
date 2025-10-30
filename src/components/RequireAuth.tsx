@@ -1,17 +1,17 @@
 import { PropsWithChildren, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 export default function RequireAuth({ children }: PropsWithChildren) {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-    if (!token) {
+    if (!isAuthenticated) {
       navigate('/signup', { replace: true });
     }
-  }, [navigate]);
+  }, [isAuthenticated, navigate]);
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-  if (!token) return null;
+  if (!isAuthenticated) return null;
   return <>{children}</>;
 }

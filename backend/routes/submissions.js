@@ -1,6 +1,7 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import Submission from '../models/Submission.js';
+import Taxonomy from '../models/Taxonomy.js';
 import jwt from 'jsonwebtoken';
 
 const router = express.Router();
@@ -71,6 +72,17 @@ router.post(
       if (village) payload.village = village;
       if (consent) payload.consent = consent;
       const doc = await Submission.create(payload);
+      // Upsert taxonomy so new tribes/villages appear for everyone immediately
+      if (country && state) {
+        const update = { $setOnInsert: { country, state }, $addToSet: {} };
+        if (tribe) update.$addToSet.tribes = String(tribe).toLowerCase();
+        if (village) update.$addToSet.villages = String(village);
+        await Taxonomy.findOneAndUpdate(
+          { country, state },
+          update,
+          { upsert: true, new: true }
+        ).catch(() => {});
+      }
       res.status(201).json(doc);
     } catch (e) {
       res.status(500).json({ errors: [{ msg: 'Server error' }] });
@@ -110,8 +122,17 @@ router.get('/tribes', async (req, res) => {
     // Consider only approved for public listing
     filter.status = 'approved';
     const tribes = await Submission.distinct('tribe', filter);
-    const cleaned = tribes.filter(Boolean).map((t) => String(t));
-    res.json(cleaned);
+    // Merge with taxonomy
+    let tax = [];
+    if (req.query.country && req.query.state) {
+      const tdoc = await Taxonomy.findOne({ country: req.query.country, state: req.query.state }).lean();
+      if (tdoc && Array.isArray(tdoc.tribes)) tax = tdoc.tribes;
+    }
+    const merged = [...tribes, ...tax]
+      .filter(Boolean)
+      .map((t) => String(t).toLowerCase());
+    const deduped = Array.from(new Set(merged));
+    res.json(deduped);
   } catch (e) {
     res.status(500).json({ errors: [{ msg: 'Server error' }] });
   }
@@ -126,8 +147,15 @@ router.get('/villages', async (req, res) => {
     if (req.query.state) filter.state = req.query.state;
     filter.status = 'approved';
     const villages = await Submission.distinct('village', filter);
-    const cleaned = villages.filter(Boolean).map((v) => String(v));
-    res.json(cleaned);
+    // Merge with taxonomy (state-level villages)
+    let tax = [];
+    if (req.query.country && req.query.state) {
+      const tdoc = await Taxonomy.findOne({ country: req.query.country, state: req.query.state }).lean();
+      if (tdoc && Array.isArray(tdoc.villages)) tax = tdoc.villages;
+    }
+    const merged = [...villages, ...tax].filter(Boolean).map((v) => String(v));
+    const deduped = Array.from(new Set(merged));
+    res.json(deduped);
   } catch (e) {
     res.status(500).json({ errors: [{ msg: 'Server error' }] });
   }

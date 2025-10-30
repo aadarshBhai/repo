@@ -9,10 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 const Upload = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { token, isAuthenticated } = useAuth();
   const [title, setTitle] = useState("");
   const [textContent, setTextContent] = useState("");
   const [type, setType] = useState<'text' | 'audio' | 'video' | 'image'>('text');
@@ -87,24 +89,36 @@ const Upload = () => {
     return () => { active = false; };
   }, [country, stateRegion]);
 
-  // Fetch villages when tribe (and optionally country/state) change for typeahead
+  // Fetch villages when tribe/country/state change for typeahead with fallback
   useEffect(() => {
     let active = true;
     (async () => {
       setVillagesLoading(true);
       try {
-        if (!tribe) {
-          if (active) setVillageOptions([]);
+        // Prefer DB villages if tribe specified
+        if (tribe) {
+          const qs = new URLSearchParams();
+          qs.set('tribe', String(tribe).toLowerCase());
+          if (country) qs.set('country', country);
+          if (stateRegion) qs.set('state', stateRegion);
+          const res = await fetch(`/api/submissions/villages?${qs.toString()}`);
+          const data = await res.json();
+          if (active && Array.isArray(data) && data.length > 0) {
+            setVillageOptions(data);
+            return;
+          }
+        }
+        // Fallback to curated reference by state for India
+        if (country && stateRegion) {
+          const qs2 = new URLSearchParams();
+          qs2.set('country', country);
+          qs2.set('state', stateRegion);
+          const res2 = await fetch(`/api/reference/villages?${qs2.toString()}`);
+          const data2 = await res2.json();
+          if (active) setVillageOptions(Array.isArray(data2) ? data2 : []);
           return;
         }
-        const qs = new URLSearchParams();
-        qs.set('tribe', String(tribe).toLowerCase());
-        if (country) qs.set('country', country);
-        if (stateRegion) qs.set('state', stateRegion);
-        const res = await fetch(`/api/submissions/villages?${qs.toString()}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.errors?.[0]?.msg || 'Failed to load villages');
-        if (active) setVillageOptions(Array.isArray(data) ? data : []);
+        if (active) setVillageOptions([]);
       } catch (_e) {
         if (active) setVillageOptions([]);
       } finally {
@@ -114,37 +128,7 @@ const Upload = () => {
     return () => { active = false; };
   }, [tribe, country, stateRegion]);
 
-  // Load/save form data to persist until successful submission
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('uploadForm');
-      if (raw) {
-        const saved = JSON.parse(raw);
-        setTitle(saved.title || "");
-        setTextContent(saved.textContent || "");
-        setType(saved.type || 'text');
-        setContentUrl(saved.contentUrl || "");
-        setCategory(saved.category || "");
-        setTribe(saved.tribe || "");
-        setCountry(saved.country || "");
-        setStateRegion(saved.stateRegion || "");
-        setVillage(saved.village || "");
-        setConsentGiven(Boolean(saved.consentGiven));
-        setConsentName(saved.consentName || "");
-        setWarningOther(Boolean(saved.warningOther));
-        setWarningOtherText(saved.warningOtherText || "");
-      }
-    } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const data = {
-      title, textContent, type, contentUrl, category, tribe, country, stateRegion, village,
-      consentGiven, consentName, warningOther, warningOtherText
-    };
-    try { localStorage.setItem('uploadForm', JSON.stringify(data)); } catch {}
-  }, [title, textContent, type, contentUrl, category, tribe, country, stateRegion, village, consentGiven, consentName, warningOther, warningOtherText]);
+  // No localStorage persistence; keep in-memory only
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -229,15 +213,18 @@ const Upload = () => {
                     {/* Suggestions */}
                     {Boolean(tribe) && !tribesLoading && tribeOptions.length > 0 && (
                       <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
-                        {tribeOptions
-                          .filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase()))
+                        {Array.from(new Set(
+                            tribeOptions
+                              .filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase()))
+                              .map((t) => String(t).toLowerCase())
+                          ))
                           .slice(0, 8)
                           .map((t) => (
                             <button
                               type="button"
                               key={t}
                               className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                              onClick={() => setTribe(String(t).toLowerCase())}
+                              onClick={() => setTribe(String(t))}
                             >
                               {t}
                             </button>
@@ -264,8 +251,11 @@ const Upload = () => {
                     />
                     {Boolean(village) && !villagesLoading && villageOptions.length > 0 && (
                       <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
-                        {villageOptions
-                          .filter((v) => String(v).toLowerCase().includes(village.toLowerCase()))
+                        {Array.from(new Set(
+                            villageOptions
+                              .filter((v) => String(v).toLowerCase().includes(village.toLowerCase()))
+                              .map((v) => String(v))
+                          ))
                           .slice(0, 8)
                           .map((v) => (
                             <button
@@ -485,10 +475,9 @@ const Upload = () => {
                     if (contentFile) {
                       const fd = new FormData();
                       fd.append('file', contentFile);
-                      const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-                      if (!token) {
+                      if (!isAuthenticated || !token) {
                         toast({ title: 'Login required', description: 'Please login to upload files', variant: 'destructive' });
-                        navigate('/login');
+                        navigate('/signup');
                         setSubmitting(false);
                         return;
                       }
@@ -512,10 +501,9 @@ const Upload = () => {
                     if (consentFile) {
                       const fd2 = new FormData();
                       fd2.append('file', consentFile);
-                      const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-                      if (!token) {
+                      if (!isAuthenticated || !token) {
                         toast({ title: 'Login required', description: 'Please login to upload files', variant: 'destructive' });
-                        navigate('/login');
+                        navigate('/signup');
                         setSubmitting(false);
                         return;
                       }
@@ -535,17 +523,16 @@ const Upload = () => {
                       consentFileUrl = upData2.path || upData2.url;
                     }
 
-                    const token2 = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-                    if (!token2) {
+                    if (!isAuthenticated || !token) {
                       toast({ title: 'Login required', description: 'Please login to submit content', variant: 'destructive' });
-                      navigate('/login');
+                      navigate('/signup');
                       setSubmitting(false);
                       return;
                     }
 
                     const res = await fetch('/api/submissions', {
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token2}` },
+                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                       body: JSON.stringify({
                         title: title.trim(),
                         description: textContent.trim(),

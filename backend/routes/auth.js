@@ -36,7 +36,10 @@ router.post(
   [
     body('name', 'Name is required').not().isEmpty(),
     body('email', 'Please include a valid email').isEmail(),
-    body('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 })
+    body('password')
+      .isString()
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/)
+      .withMessage('Password must be at least 8 characters and include uppercase, lowercase, and a special character')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -215,7 +218,10 @@ router.post(
   '/reset-password',
   [
     body('token', 'Token is required').isString().notEmpty(),
-    body('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 })
+    body('password')
+      .isString()
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/)
+      .withMessage('Password must be at least 8 characters and include uppercase, lowercase, and a special character')
   ],
   async (req, res) => {
     const errors = validationResult(req);

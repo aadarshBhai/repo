@@ -1,59 +1,28 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 interface AuthContextType {
+  token: string | null;
   isAuthenticated: boolean;
-  login: (token?: string) => void;
+  login: (token: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [token, setToken] = useState<string | null>(null);
 
-  const syncFromStorage = useCallback(() => {
-    const ut = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-    const at = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-    setIsAuthenticated(Boolean(ut || at));
+  const login = useCallback((t: string) => {
+    setToken(String(t));
   }, []);
 
-  useEffect(() => {
-    syncFromStorage();
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === 'userToken' || e.key === 'adminToken') {
-        syncFromStorage();
-      }
-    };
-    if (typeof window !== 'undefined') {
-      window.addEventListener('storage', onStorage);
-    }
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('storage', onStorage);
-      }
-    };
-  }, [syncFromStorage]);
-
-  const login = useCallback((token?: string) => {
-    if (typeof window !== 'undefined') {
-      if (token) localStorage.setItem('userToken', token);
-    }
-    syncFromStorage();
-  }, [syncFromStorage]);
-
   const logout = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('userToken');
-      localStorage.removeItem('adminToken');
-    }
-    syncFromStorage();
-  }, [syncFromStorage]);
+    setToken(null);
+  }, []);
 
-  const value = useMemo(() => ({ isAuthenticated, login, logout }), [isAuthenticated, login, logout]);
+  const value = useMemo(() => ({ token, isAuthenticated: Boolean(token), login, logout }), [token, login, logout]);
 
-  return (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

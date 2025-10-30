@@ -83,6 +83,8 @@ const Explore = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [openItem, setOpenItem] = useState<any | null>(null);
   const [openConsentId, setOpenConsentId] = useState<string | null>(null);
+  const [tribeFocused, setTribeFocused] = useState(false);
+  const [villageFocused, setVillageFocused] = useState(false);
 
   // Quick live filter controls (client-side)
   const [quickField, setQuickField] = useState<'tribe' | 'village'>('tribe');
@@ -169,24 +171,40 @@ const Explore = () => {
     return () => { active = false; };
   }, [country, stateRegion]);
 
-  // Fetch villages when tribe (and optionally country/state) change
+  // Fetch villages when filters change
   useEffect(() => {
     let active = true;
     (async () => {
       setVillagesLoading(true);
       try {
-        if (!tribe) {
-          if (active) setVillageOptions([]);
+        // If tribe selected, prefer DB-driven villages
+        if (tribe) {
+          const qs = new URLSearchParams();
+          qs.set("tribe", tribe);
+          if (country) qs.set("country", country);
+          if (stateRegion) qs.set("state", stateRegion);
+          const res = await fetch(`/api/submissions/villages?${qs.toString()}`);
+          const data = await res.json();
+          if (active) {
+            if (Array.isArray(data) && data.length > 0) {
+              setVillageOptions(data);
+              return;
+            }
+            // Fall through to reference if none
+          }
+        }
+
+        // No tribe or no DB villages: use curated reference for India by state
+        if (country && stateRegion) {
+          const qs2 = new URLSearchParams();
+          qs2.set('country', country);
+          qs2.set('state', stateRegion);
+          const res2 = await fetch(`/api/reference/villages?${qs2.toString()}`);
+          const data2 = await res2.json();
+          if (active) setVillageOptions(Array.isArray(data2) ? data2 : []);
           return;
         }
-        const qs = new URLSearchParams();
-        qs.set("tribe", tribe);
-        if (country) qs.set("country", country);
-        if (stateRegion) qs.set("state", stateRegion);
-        const res = await fetch(`/api/submissions/villages?${qs.toString()}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.errors?.[0]?.msg || "Failed to load villages");
-        if (active) setVillageOptions(Array.isArray(data) ? data : []);
+        if (active) setVillageOptions([]);
       } catch (_e) {
         if (active) setVillageOptions([]);
       } finally {
@@ -316,11 +334,16 @@ const Explore = () => {
                   aria-label="Tribe"
                   disabled={!country || !stateRegion}
                   autoComplete="off"
+                  onFocus={() => setTribeFocused(true)}
+                  onBlur={() => setTimeout(() => setTribeFocused(false), 150)}
                 />
-                {Boolean(tribe) && !tribesLoading && tribeOptions.length > 0 && (
+                {(tribeFocused || Boolean(tribe)) && !tribesLoading && tribeOptions.length > 0 && (
                   <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
-                    {tribeOptions
-                      .filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase()))
+                    {Array.from(new Set(
+                        tribeOptions
+                          .filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase()))
+                          .map((t) => String(t).toLowerCase())
+                      ))
                       .slice(0, 8)
                       .map((t) => (
                         <button
@@ -345,15 +368,20 @@ const Explore = () => {
                 <Input
                   value={village}
                   onChange={(e) => changeParam("village", e.target.value)}
-                  placeholder={!tribe ? "Select tribe first" : "Type village…"}
+                  placeholder={!country || !stateRegion ? "Select country/state first" : "Type village…"}
                   aria-label="Village"
-                  disabled={!tribe}
+                  disabled={!country || !stateRegion}
                   autoComplete="off"
+                  onFocus={() => setVillageFocused(true)}
+                  onBlur={() => setTimeout(() => setVillageFocused(false), 150)}
                 />
-                {Boolean(village) && !villagesLoading && villageOptions.length > 0 && (
+                {(villageFocused || Boolean(village)) && !villagesLoading && villageOptions.length > 0 && (
                   <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
-                    {villageOptions
-                      .filter((v) => String(v).toLowerCase().includes(village.toLowerCase()))
+                    {Array.from(new Set(
+                        villageOptions
+                          .filter((v) => String(v).toLowerCase().includes(village.toLowerCase()))
+                          .map((v) => String(v))
+                      ))
                       .slice(0, 8)
                       .map((v) => (
                         <button

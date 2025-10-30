@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import submissionsRoutes from "./routes/submissions.js";
 import uploadsRoutes from "./routes/uploads.js";
+import referenceRoutes from "./routes/reference.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -24,6 +25,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/submissions", submissionsRoutes);
 app.use("/api/uploads", uploadsRoutes);
+app.use("/api/reference", referenceRoutes);
 
 // ===== Serve Uploaded Files =====
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
