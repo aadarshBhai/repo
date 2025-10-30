@@ -42,10 +42,10 @@ const Landing = () => {
             <h1 className="font-body uppercase tracking-[0.08em] text-primary-foreground text-4xl md:text-6xl lg:text-7xl leading-[1.1] font-semibold">
               Heritage Repository
             </h1>
-            <h2 className="font-body uppercase tracking-[0.22em] text-primary-foreground/95 text-xl md:text-3xl lg:text-4xl mt-1 font-medium">
+            <h2 className="font-body uppercase tracking-[0.22em] text-primary-foreground/95 text-lg md:text-2xl lg:text-3xl mt-1 font-medium">
               Consent-Based, Tiered Digital Archive
             </h2>
-            <p className="text-primary-foreground/90 text-xs md:text-sm max-w-[55ch] mt-5">
+            <p className="text-primary-foreground/90 text-sm md:text-base max-w-[55ch] mt-5">
               Safeguarding heritage — ethically and authentically. Discover, learn, and contribute with consent-first principles.
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
@@ -295,14 +295,6 @@ const Landing = () => {
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h3 className="text-xl md:text-2xl font-semibold">Join us in safeguarding living heritage</h3>
           <p className="mt-2 md:mt-3 text-sm md:text-base text-muted-foreground">Your curiosity and care help traditions thrive.</p>
-          <div className="mt-5 md:mt-6 flex items-center justify-center gap-3">
-            <Button asChild size="sm">
-              <Link to="/signup">Create an account</Link>
-            </Button>
-            <Button variant="outline" asChild size="sm">
-              <Link to="/about-us">Learn more</Link>
-            </Button>
-          </div>
         </div>
       </section>
 

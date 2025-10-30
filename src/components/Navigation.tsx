@@ -10,14 +10,13 @@ const Navigation = () => {
   useEffect(() => {
     const syncAuth = () => {
       const ut = typeof window !== 'undefined' ? localStorage.getItem('userToken') : null;
-      const at = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-      setLoggedIn(Boolean(ut || at));
+      setLoggedIn(Boolean(ut));
     };
     // Initialize on mount and on route changes (e.g., after login redirect)
     syncAuth();
     // Listen for auth changes across tabs/windows
     const handler = (e: StorageEvent) => {
-      if (e.key === 'userToken' || e.key === 'adminToken') {
+      if (e.key === 'userToken') {
         syncAuth();
       }
     };
@@ -51,7 +50,7 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 bg-primary text-primary-foreground backdrop-blur-sm shadow-sm">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 sm:px-6 md:px-8 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <h1 className="text-xl md:text-2xl font-heading font-bold text-primary-foreground">
@@ -89,15 +88,15 @@ const Navigation = () => {
             )}
             {!loggedIn ? (
               <Link
-                to="/login"
+                to="/signup"
                 className={cn(
                   "nav-link text-sm font-medium transition-colors",
-                  location.pathname === '/login'
+                  location.pathname === '/signup'
                     ? "text-primary-foreground"
                     : "text-primary-foreground/80 hover:text-primary-foreground"
                 )}
               >
-                Login
+                Sign Up
               </Link>
             ) : null}
           </div>
@@ -134,15 +133,15 @@ const Navigation = () => {
               )}
               {!loggedIn ? (
                 <Link
-                  to="/login"
+                  to="/signup"
                   className={cn(
                     "text-xs font-medium px-2 py-1",
-                    location.pathname === '/login'
+                    location.pathname === '/signup'
                       ? "text-primary-foreground"
                       : "text-primary-foreground/80"
                   )}
                 >
-                  Login
+                  Sign Up
                 </Link>
               ) : null}
             </div>

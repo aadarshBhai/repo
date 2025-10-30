@@ -84,6 +84,10 @@ const Explore = () => {
   const [openItem, setOpenItem] = useState<any | null>(null);
   const [openConsentId, setOpenConsentId] = useState<string | null>(null);
 
+  // Quick live filter controls (client-side)
+  const [quickField, setQuickField] = useState<'tribe' | 'village'>('tribe');
+  const [quickQuery, setQuickQuery] = useState('');
+
   const q = searchParams.get("q") || "";
   const tribe = searchParams.get("tribe") || "";
   const category = searchParams.get("category") || "";
@@ -206,6 +210,10 @@ const Explore = () => {
       const vneedle = village.toLowerCase();
       arr = arr.filter((it) => String(it.village || "").toLowerCase().includes(vneedle));
     }
+    if (quickQuery.trim()) {
+      const qn = quickQuery.toLowerCase();
+      arr = arr.filter((it) => String(it[quickField] || '').toLowerCase().includes(qn));
+    }
     if (sort === "latest") {
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     } else if (sort === "oldest") {
@@ -214,7 +222,7 @@ const Explore = () => {
       arr.sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0));
     }
     return arr;
-  }, [items, q, sort, village]);
+  }, [items, q, sort, village, quickField, quickQuery]);
 
   const fmtAgo = (iso?: string) => {
     if (!iso) return "";
@@ -241,8 +249,8 @@ const Explore = () => {
     <div className="min-h-screen flex flex-col font-sans leading-relaxed">
       <div className="flex-1 py-6 md:py-8 px-4">
         <div className="container mx-auto max-w-7xl">
-          <div className="mb-6 flex flex-wrap items-center gap-3 md:gap-4">
-            <div className="basis-full sm:basis-auto flex-1 min-w-[220px]">
+          <div className="mb-6 flex flex-nowrap items-center gap-2 md:gap-3 overflow-visible">
+            <div className="flex-1 min-w-0">
               <Input
                 value={q}
                 onChange={(e) => changeParam("q", e.target.value)}
@@ -251,7 +259,7 @@ const Explore = () => {
                 className="w-full"
               />
             </div>
-            <div className="basis-[160px] grow sm:grow-0">
+            <div className="w-[120px] min-w-0">
               <Select value={sort} onValueChange={(v) => changeParam("sort", v)}>
                 <SelectTrigger aria-label="Sort by" className="w-full">
                   <SelectValue placeholder="Sort by" />
@@ -263,7 +271,7 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="basis-[180px] grow sm:grow-0">
+            <div className="w-[140px] min-w-0">
               <Select value={category} onValueChange={(v) => changeParam("category", v)}>
                 <SelectTrigger aria-label="Category" className="w-full">
                   <SelectValue placeholder="Category" />
@@ -275,7 +283,7 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="basis-[180px] grow sm:grow-0">
+            <div className="w-[140px] min-w-0">
               <Select value={country} onValueChange={(v) => changeParam("country", v)}>
                 <SelectTrigger aria-label="Country" className="w-full">
                   <SelectValue placeholder="Country" />
@@ -287,7 +295,7 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="basis-[200px] grow sm:grow-0">
+            <div className="w-[160px] min-w-0">
               <Select value={stateRegion} onValueChange={(v) => changeParam("state", v)} disabled={!country}>
                 <SelectTrigger aria-label="State or Region" className="w-full">
                   <SelectValue placeholder={country ? "State/Region" : "Select country first"} />
@@ -299,55 +307,73 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="basis-[180px] grow sm:grow-0">
-              <Select
-                value={tribe}
-                onValueChange={(v) => changeParam("tribe", v)}
-                disabled={!country || !stateRegion || tribesLoading || tribeOptions.length === 0}
-              >
-                <SelectTrigger aria-label="Tribe" className="w-full">
-                  <SelectValue placeholder={
-                    !country || !stateRegion ? "Select country and state first" :
-                    tribesLoading ? "Loading tribes…" :
-                    tribeOptions.length === 0 ? "No tribes available" : "Tribe"
-                  } />
-                </SelectTrigger>
-                <SelectContent>
-                  {tribeOptions.length > 0 ? (
-                    tribeOptions.map((t) => (
-                      <SelectItem key={t} value={String(t).toLowerCase()}>{t}</SelectItem>
-                    ))
-                  ) : (
-                    <div className="px-2 py-1.5 text-sm text-muted-foreground">No tribes available</div>
-                  )}
-                </SelectContent>
-              </Select>
+            <div className="w-[140px] min-w-0">
+              <div className="relative">
+                <Input
+                  value={tribe}
+                  onChange={(e) => changeParam("tribe", e.target.value)}
+                  placeholder={!country || !stateRegion ? "Select country/state" : "Type tribe…"}
+                  aria-label="Tribe"
+                  disabled={!country || !stateRegion}
+                  autoComplete="off"
+                />
+                {Boolean(tribe) && !tribesLoading && tribeOptions.length > 0 && (
+                  <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
+                    {tribeOptions
+                      .filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase()))
+                      .slice(0, 8)
+                      .map((t) => (
+                        <button
+                          type="button"
+                          key={t}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                          onClick={() => changeParam("tribe", String(t).toLowerCase())}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    {tribeOptions.filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase())).length === 0 && (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {tribesLoading && <div className="text-[10px] text-muted-foreground mt-1">Loading tribes…</div>}
             </div>
-            <div className="basis-[180px] grow sm:grow-0">
-              <Select
-                value={village}
-                onValueChange={(v) => changeParam("village", v)}
-                disabled={!tribe || villagesLoading || villageOptions.length === 0}
-              >
-                <SelectTrigger aria-label="Village" className="w-full">
-                  <SelectValue placeholder={
-                    !tribe ? "Select tribe first" :
-                    villagesLoading ? "Loading villages…" :
-                    villageOptions.length === 0 ? "No villages available" : "Village"
-                  } />
-                </SelectTrigger>
-                <SelectContent>
-                  {villageOptions.length > 0 ? (
-                    villageOptions.map((v) => (
-                      <SelectItem key={v} value={String(v)}>{v}</SelectItem>
-                    ))
-                  ) : (
-                    <div className="px-2 py-1.5 text-sm text-muted-foreground">No villages available</div>
-                  )}
-                </SelectContent>
-              </Select>
+            <div className="w-[140px] min-w-0">
+              <div className="relative">
+                <Input
+                  value={village}
+                  onChange={(e) => changeParam("village", e.target.value)}
+                  placeholder={!tribe ? "Select tribe first" : "Type village…"}
+                  aria-label="Village"
+                  disabled={!tribe}
+                  autoComplete="off"
+                />
+                {Boolean(village) && !villagesLoading && villageOptions.length > 0 && (
+                  <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
+                    {villageOptions
+                      .filter((v) => String(v).toLowerCase().includes(village.toLowerCase()))
+                      .slice(0, 8)
+                      .map((v) => (
+                        <button
+                          type="button"
+                          key={String(v)}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                          onClick={() => changeParam("village", String(v))}
+                        >
+                          {String(v)}
+                        </button>
+                      ))}
+                    {villageOptions.filter((vv) => String(vv).toLowerCase().includes(village.toLowerCase())).length === 0 && (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {villagesLoading && <div className="text-[10px] text-muted-foreground mt-1">Loading villages…</div>}
             </div>
-            <div className="flex gap-2 basis-full sm:basis-auto">
+            <div className="flex gap-2 shrink-0">
               <Button className="w-full sm:w-auto" variant="outline" onClick={() => setSearchParams({}, { replace: true })}>Reset</Button>
             </div>
           </div>

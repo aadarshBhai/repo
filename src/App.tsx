@@ -18,6 +18,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
+import RequireAuth from "./components/RequireAuth";
+import { AuthProvider } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -26,24 +28,26 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/explore" element={<><Navigation /><Explore /></>} />
-          <Route path="/upload" element={<><Navigation /><Upload /></>} />
-          <Route path="/about-us" element={<><Navigation /><About /></>} />
-          <Route path="/login" element={<><Navigation /><Login /></>} />
-          <Route path="/signup" element={<><Navigation /><SignUp /></>} />
-          <Route path="/forgot-password" element={<><Navigation /><ForgotPassword /></>} />
-          <Route path="/reset-password" element={<><Navigation /><ResetPassword /></>} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
-          <Route path="/category/:categoryName" element={<><Navigation /><Category /></>} />
-          <Route path="/profile" element={<><Navigation /><Profile /></>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/explore" element={<><Navigation /><Explore /></>} />
+            <Route path="/upload" element={<><Navigation /><Upload /></>} />
+            <Route path="/about-us" element={<><Navigation /><About /></>} />
+            <Route path="/login" element={<><Navigation /><Login /></>} />
+            <Route path="/signup" element={<><Navigation /><SignUp /></>} />
+            <Route path="/forgot-password" element={<><Navigation /><ForgotPassword /></>} />
+            <Route path="/reset-password" element={<><Navigation /><ResetPassword /></>} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
+            <Route path="/category/:categoryName" element={<><Navigation /><Category /></>} />
+            <Route path="/profile" element={<RequireAuth><><Navigation /><Profile /></></RequireAuth>} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

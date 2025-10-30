@@ -32,6 +32,8 @@ const Upload = () => {
   const [warningOtherText, setWarningOtherText] = useState("");
   const [tribeOptions, setTribeOptions] = useState<string[]>([]);
   const [tribesLoading, setTribesLoading] = useState(false);
+  const [villageOptions, setVillageOptions] = useState<string[]>([]);
+  const [villagesLoading, setVillagesLoading] = useState(false);
 
   const categories = [
     "Folktales",
@@ -85,6 +87,33 @@ const Upload = () => {
     return () => { active = false; };
   }, [country, stateRegion]);
 
+  // Fetch villages when tribe (and optionally country/state) change for typeahead
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setVillagesLoading(true);
+      try {
+        if (!tribe) {
+          if (active) setVillageOptions([]);
+          return;
+        }
+        const qs = new URLSearchParams();
+        qs.set('tribe', String(tribe).toLowerCase());
+        if (country) qs.set('country', country);
+        if (stateRegion) qs.set('state', stateRegion);
+        const res = await fetch(`/api/submissions/villages?${qs.toString()}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.errors?.[0]?.msg || 'Failed to load villages');
+        if (active) setVillageOptions(Array.isArray(data) ? data : []);
+      } catch (_e) {
+        if (active) setVillageOptions([]);
+      } finally {
+        if (active) setVillagesLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [tribe, country, stateRegion]);
+
   // Load/save form data to persist until successful submission
   useEffect(() => {
     try {
@@ -129,6 +158,8 @@ const Upload = () => {
               Share your cultural heritage with the community
             </p>
           </div>
+
+          {/* No additional top filters; typeahead is inside the form fields below */}
 
           <div className="bg-background border rounded-lg p-6 space-y-6">
             <div>
@@ -183,45 +214,76 @@ const Upload = () => {
                   </Select>
                 </div>
 
-                {/* Tribe */}
+                {/* Tribe (typeahead) */}
                 <div className="space-y-2">
                   <Label htmlFor="tribe">Tribe</Label>
-                  {tribeOptions.length > 0 ? (
-                    <Select
-                      value={tribe}
-                      onValueChange={setTribe}
-                      disabled={!country || !stateRegion || tribesLoading || tribeOptions.length === 0}
-                    >
-                      <SelectTrigger id="tribe">
-                        <SelectValue
-                          placeholder={
-                            !country || !stateRegion ? "Select country/state first" :
-                            tribesLoading ? "Loading tribes…" :
-                            tribeOptions.length === 0 ? "No tribes available" : "Select tribe"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {tribeOptions.map((t) => (
-                          <SelectItem key={t} value={String(t).toLowerCase()}>{t}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
+                  <div className="relative">
                     <Input
                       id="tribe"
-                      placeholder={!country || !stateRegion ? "Select country/state first" : "Type tribe"}
+                      placeholder={!country || !stateRegion ? "Select country/state first" : "Start typing tribe…"}
                       value={tribe}
                       onChange={(e) => setTribe(e.target.value)}
                       disabled={!country || !stateRegion}
+                      autoComplete="off"
                     />
-                  )}
+                    {/* Suggestions */}
+                    {Boolean(tribe) && !tribesLoading && tribeOptions.length > 0 && (
+                      <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
+                        {tribeOptions
+                          .filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase()))
+                          .slice(0, 8)
+                          .map((t) => (
+                            <button
+                              type="button"
+                              key={t}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                              onClick={() => setTribe(String(t).toLowerCase())}
+                            >
+                              {t}
+                            </button>
+                          ))}
+                        {tribeOptions.filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase())).length === 0 && (
+                          <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {tribesLoading && <div className="text-xs text-muted-foreground">Loading tribes…</div>}
                 </div>
 
-                {/* Village */}
+                {/* Village (typeahead) */}
                 <div className="space-y-2">
                   <Label htmlFor="village">Village</Label>
-                  <Input id="village" placeholder="Enter village" value={village} onChange={(e) => setVillage(e.target.value)} />
+                  <div className="relative">
+                    <Input
+                      id="village"
+                      placeholder={!tribe ? "Select or type tribe first" : "Start typing village…"}
+                      value={village}
+                      onChange={(e) => setVillage(e.target.value)}
+                      autoComplete="off"
+                    />
+                    {Boolean(village) && !villagesLoading && villageOptions.length > 0 && (
+                      <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
+                        {villageOptions
+                          .filter((v) => String(v).toLowerCase().includes(village.toLowerCase()))
+                          .slice(0, 8)
+                          .map((v) => (
+                            <button
+                              type="button"
+                              key={String(v)}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                              onClick={() => setVillage(String(v))}
+                            >
+                              {String(v)}
+                            </button>
+                          ))}
+                        {villageOptions.filter((v) => String(v).toLowerCase().includes(village.toLowerCase())).length === 0 && (
+                          <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {villagesLoading && <div className="text-xs text-muted-foreground">Loading villages…</div>}
                 </div>
               </div>
 
