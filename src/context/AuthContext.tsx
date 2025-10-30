@@ -10,14 +10,23 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('auth_token');
+    } catch {
+      return null;
+    }
+  });
 
   const login = useCallback((t: string) => {
-    setToken(String(t));
+    const v = String(t);
+    setToken(v);
+    try { localStorage.setItem('auth_token', v); } catch {}
   }, []);
 
   const logout = useCallback(() => {
     setToken(null);
+    try { localStorage.removeItem('auth_token'); } catch {}
   }, []);
 
   const value = useMemo(() => ({ token, isAuthenticated: Boolean(token), login, logout }), [token, login, logout]);
