@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import heroBg from "@/assets/hero-bg.jpg";
 import { useRef } from "react";
-import { ArrowDown, PlayCircle, Map, Sparkles } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 
 const Landing = () => {
   const howRef = useRef<HTMLDivElement | null>(null);
@@ -91,9 +91,8 @@ const Landing = () => {
           </div>
 
           <ol className="space-y-6 md:space-y-8 max-w-3xl mx-auto">
-            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
+            <li className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <div className="flex items-center gap-3 text-primary mb-2">
-                <PlayCircle className="h-6 w-6" />
                 <h3 className="text-lg md:text-xl font-semibold">1. Explore & Learn</h3>
               </div>
               <div className="hidden md:block absolute right-4 top-4">
@@ -105,17 +104,16 @@ const Landing = () => {
                 />
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
-                <li>Browse folktales, songs, rituals, and artifacts contributed by communities.</li>
+                <li>Browse Folksongs, Folktales, Ritual Practices and Material Culture contributed by communities.</li>
                 <li>Each entry displays its consent level — Public, Restricted, or Confidential.</li>
-                <li>Access detailed descriptions, listen to audio clips, or view cultural videos.</li>
-                <li>Save your favorite stories to your collection for future learning.</li>
+                <li>Access detailed descriptions, listen to audio clips, view cultural videos and read cultural content </li>
+                <li>Save your cultural stories to your collection for future learning.</li>
               </ul>
-              <p className="mt-3 text-xs md:text-sm text-foreground/80"> Respect each item’s consent tier — not all content is meant for public use.</p>
+              <p className="mt-3 text-xs md:text-sm text-foreground/80">Respect each item’s consent tier — not all content is meant for public use.</p>
             </li>
 
-            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
+            <li className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <div className="flex items-center gap-3 text-primary mb-2">
-                <Sparkles className="h-6 w-6" />
                 <h3 className="text-lg md:text-xl font-semibold">2. Contribute Respectfully</h3>
               </div>
               <div className="hidden md:block absolute right-4 top-4">
@@ -127,7 +125,7 @@ const Landing = () => {
                 />
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
-                <li>Share your own folktales, folksongs, dances, rituals, or artifacts as text, image, audio, or video.</li>
+                <li>Share your own Folksongs, Folktales, Ritual Practices and Material Culture as text, image, audio, or video.</li>
                 <li>Ensure you have clear community consent before uploading.</li>
                 <li>Fill in all required metadata: category, tribe, region, and a short description.</li>
                 <li>Upload a consent document and select the right sensitivity level (Public / Restricted / Confidential).</li>
@@ -135,9 +133,8 @@ const Landing = () => {
               <p className="mt-3 text-xs md:text-sm text-foreground/80">Submissions are reviewed by community elders and cultural experts before publication.</p>
             </li>
 
-            <li className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
+            <li className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <div className="flex items-center gap-3 text-primary mb-2">
-                <Map className="h-6 w-6" />
                 <h3 className="text-lg md:text-xl font-semibold">3. Follow the Roadmap</h3>
               </div>
               <div className="hidden md:block absolute right-4 top-4">
@@ -149,8 +146,8 @@ const Landing = () => {
                 />
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
-                <li>Collection: Gathering stories and materials with consent.</li>
-                <li>Verification: Elders and scholars ensure accuracy and sensitivity.</li>
+                <li>Collection: Gathering Folk Stories and Material Culture with consent.</li>
+                <li>Verification: Elders and community experts ensure accuracy and sensitivity.</li>
                 <li>Publication: Approved items are published with tiered access.</li>
               </ul>
               <p className="mt-3 text-xs md:text-sm text-foreground/80">You can explore learning roadmaps built by experts and culture bearers to understand traditions deeply.</p>
@@ -175,13 +172,13 @@ const Landing = () => {
       <section ref={roadmapRef} className="relative py-16 md:py-24 bg-muted/3 border-t border-border/60">
         <div className="relative max-w-6xl mx-auto px-4">
           <div className="mb-8 md:mb-12 text-center">
-            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">Heritage Repository Roadmap</h2>
-            <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">A clear path from collection to publication</p>
-            <p className="mt-2 text-xs md:text-sm text-muted-foreground max-w-3xl mx-auto">Every cultural submission follows a transparent, consent-based process to ensure authenticity and respect.</p>
+            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">3. Heritage Repository Roadmap</h2>
+            <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">A clear path from collection to publication.</p>
+            <p className="mt-2 text-xs md:text-sm text-muted-foreground max-w-3xl mx-auto">Every cultural submission follows a transparent, consent-based process to ensure authenticity and ethical cultural preservation.</p>
           </div>
 
           <div className="max-w-3xl mx-auto">
-            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
+            <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <h3 className="text-lg md:text-xl font-semibold">Collection</h3>
               <div className="hidden md:block absolute right-4 top-4">
                 <img
@@ -191,13 +188,13 @@ const Landing = () => {
                   loading="lazy"
                 />
               </div>
-              <p className="mt-2 text-sm md:text-base text-foreground/85">Community members document folktales, songs, dances, and artifacts — always with <strong>informed consent</strong> from the knowledge holders.</p>
-              <p className="mt-2 text-xs md:text-sm text-foreground/80"> <em>Goal: Preserve stories responsibly.</em></p>
+              <p className="mt-2 text-sm md:text-base text-foreground/85">Community members document Folksongs, Folktales, Ritual Practices and Material Culture with informed consent from the knowledge holders.</p>
+              <p className="mt-2 text-xs md:text-sm text-foreground/80"><em>Goal: Preserve Cultural Heritage Ethically</em></p>
             </div>
 
-            <div className="my-3 md:my-4 text-center" aria-hidden>⬇</div>
+            <div className="my-3 md:my-4 text-center" aria-hidden></div>
 
-            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
+            <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <h3 className="text-lg md:text-xl font-semibold">Verification</h3>
               <div className="hidden md:block absolute right-4 top-4">
                 <img
@@ -207,13 +204,13 @@ const Landing = () => {
                   loading="lazy"
                 />
               </div>
-              <p className="mt-2 text-sm md:text-base text-foreground/85"><strong>Elders, scholars, and cultural experts</strong> carefully review each submission for <strong>accuracy, sensitivity, and cultural integrity.</strong></p>
-              <p className="mt-2 text-xs md:text-sm text-foreground/80"> <em>Goal: Ensure authenticity and ethical handling.</em></p>
+              <p className="mt-2 text-sm md:text-base text-foreground/85">Community elders and cultural experts carefully review each submission for accuracy, sensitivity, and cultural integrity.</p>
+              <p className="mt-2 text-xs md:text-sm text-foreground/80"><em>Goal: Ensure Authenticity and Ethical Handling.</em></p>
             </div>
 
-            <div className="my-3 md:my-4 text-center" aria-hidden>⬇</div>
+            <div className="my-3 md:my-4 text-center" aria-hidden></div>
 
-            <div className="rounded-xl p-5 md:p-6 bg-card/80 backdrop-blur border relative overflow-hidden">
+            <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <h3 className="text-lg md:text-xl font-semibold">Publication</h3>
               <div className="hidden md:block absolute right-4 top-4">
                 <img
@@ -223,13 +220,13 @@ const Landing = () => {
                   loading="lazy"
                 />
               </div>
-              <p className="mt-2 text-sm md:text-base text-foreground/85">Once verified, the content is published in the Repository with <strong>tiered access:</strong></p>
+              <p className="mt-2 text-sm md:text-base text-foreground/85">Once verified, the content is published in the Repository with tiered access:</p>
               <ul className="mt-2 list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
-                <li><em>Public</em> → Open for all viewers</li>
-                <li><em>Restricted</em> → Limited to researchers/learners</li>
-                <li><em>Confidential</em> → Accessible only to designated custodians</li>
+                <li>Public → Open for all viewers</li>
+                <li>Restricted → Limited to researchers/learners</li>
+                <li>Confidential → Accessible only to designated custodians</li>
               </ul>
-              <p className="mt-2 text-xs md:text-sm text-foreground/80"> <em>Goal: Protect sacred knowledge while promoting education and continuity.</em></p>
+              <p className="mt-2 text-xs md:text-sm text-foreground/80"><em>Goal: Protect Cultural Heritage Knowledge while promoting cultural awareness, education and cultural continuity.</em></p>
             </div>
 
           
