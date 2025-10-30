@@ -169,12 +169,8 @@ const Landing = () => {
             <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <h3 className="text-lg md:text-xl font-semibold">Collection</h3>
               <div className="hidden md:block absolute right-4 top-4">
-                <img
-                  src="https://images.unsplash.com/photo-1510936111840-65e151ad71bb?q=80&w=800&auto=format&fit=crop"
-                  alt="Collection"
-                  className="w-28 h-20 rounded-lg object-cover border"
-                  loading="lazy"
-                />
+              
+          
               </div>
               <p className="mt-2 text-sm md:text-base text-foreground/85">Community members document Folksongs, Folktales, Ritual Practices and Material Culture with informed consent from the knowledge holders.</p>
               <p className="mt-2 text-xs md:text-sm text-foreground/80"><em>Goal: Preserve Cultural Heritage Ethically</em></p>
@@ -185,12 +181,7 @@ const Landing = () => {
             <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <h3 className="text-lg md:text-xl font-semibold">Verification</h3>
               <div className="hidden md:block absolute right-4 top-4">
-                <img
-                  src="https://images.unsplash.com/photo-1516383607781-913a19294fd1?q=80&w=800&auto=format&fit=crop"
-                  alt="Verification"
-                  className="w-28 h-20 rounded-lg object-cover border"
-                  loading="lazy"
-                />
+                
               </div>
               <p className="mt-2 text-sm md:text-base text-foreground/85">Community elders and cultural experts carefully review each submission for accuracy, sensitivity, and cultural integrity.</p>
               <p className="mt-2 text-xs md:text-sm text-foreground/80"><em>Goal: Ensure Authenticity and Ethical Handling.</em></p>
@@ -201,12 +192,7 @@ const Landing = () => {
             <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <h3 className="text-lg md:text-xl font-semibold">Publication</h3>
               <div className="hidden md:block absolute right-4 top-4">
-                <img
-                  src="https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=800&auto=format&fit=crop"
-                  alt="Publication"
-                  className="w-28 h-20 rounded-lg object-cover border"
-                  loading="lazy"
-                />
+              
               </div>
               <p className="mt-2 text-sm md:text-base text-foreground/85">Once verified, the content is published in the Repository with tiered access:</p>
               <ul className="mt-2 list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
