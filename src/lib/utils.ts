@@ -22,6 +22,11 @@ export function mediaSrc(u?: string) {
     const url = new URL(u, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
     const path = `${url.pathname}${url.search}${url.hash}`;
     if (path.startsWith("/uploads/")) return path;
+    // Cloudinary PDF fix: ensure raw delivery for PDFs (avoid image/upload 401)
+    const isCloudinary = /(^|\.)res\.cloudinary\.com$/i.test(url.hostname);
+    if (isCloudinary && /\.pdf(\?|#|$)/i.test(path) && /\/image\/upload\//i.test(path)) {
+      return u.replace(/\/image\/upload\//i, "/raw/upload/");
+    }
     return u;
   } catch {
     return u;
