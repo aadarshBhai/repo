@@ -17,20 +17,69 @@ const Admin = () => {
 
   const renderConsentPreview = (url: string) => {
     const u = mediaSrc(url);
+    const isPdf = /\.pdf(\?|$)/i.test(u);
+    
+    if (isPdf) {
+      // For PDFs, show a preview with download button instead of auto-rendering
+      return (
+        <div className="space-y-2">
+          <div className="p-4 border rounded bg-muted/20 text-center">
+            <FileText className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground mb-3">PDF Document</p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <a 
+                href={u} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                View PDF
+              </a>
+              <a 
+                href={u} 
+                download
+                className="px-3 py-1.5 text-sm border rounded-md hover:bg-muted transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Download
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // For images
     if (/(\.(png|jpe?g|gif|webp|bmp|svg)(\?|$))/i.test(u)) {
       return <img src={u} alt="Consent file" className="w-full h-auto rounded" />;
     }
+    
+    // For videos
     if (/(\.(mp4|webm|ogg)(\?|$))/i.test(u)) {
       return <video src={u} controls className="w-full rounded" />;
     }
+    
+    // For audio
     if (/(\.(mp3|wav|ogg)(\?|$))/i.test(u)) {
       return <audio src={u} controls className="w-full" />;
     }
+    
+    // Fallback for other file types
     return (
       <div className="space-y-2">
-        <iframe src={u} title="Consent preview" className="w-full h-64 md:h-80 border rounded" />
-        <div>
-          <a href={u} target="_blank" rel="noreferrer" className="underline text-primary text-sm">Open in new tab</a>
+        <div className="p-4 border rounded bg-muted/20 text-center">
+          <FileText className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground mb-3">Document Preview</p>
+          <a 
+            href={u} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-block px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            View File
+          </a>
         </div>
       </div>
     );
