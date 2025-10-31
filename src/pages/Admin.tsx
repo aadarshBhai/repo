@@ -42,10 +42,8 @@ const Admin = () => {
   const [loading, setLoading] = useState(false);
 
   const renderFilePreview = (url: string, type?: string) => {
-    const u = mediaSrc(url);
-    
-    // Handle missing or invalid URLs
-    if (!url || !u) {
+    // Handle empty or invalid URLs
+    if (!url) {
       return (
         <div className="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded">
           File not available
@@ -53,11 +51,25 @@ const Admin = () => {
       );
     }
     
+    // Process the URL through mediaSrc utility
+    const u = mediaSrc(url);
+    
+    // Handle invalid URL after processing
+    if (!u) {
+      return (
+        <div className="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded">
+          Could not load file: {url.length > 50 ? `${url.substring(0, 50)}...` : url}
+        </div>
+      );
+    }
+    
+    // Check file type
     const isPdf = /\.pdf(\?|$)/i.test(u);
     const isImage = /(\.(png|jpe?g|gif|webp|bmp|svg)(\?|$))/i.test(u);
     const isVideo = /(\.(mp4|webm|ogg|mov|avi)(\?|$))/i.test(u);
     const isAudio = /(\.(mp3|wav|ogg)(\?|$))/i.test(u);
     
+    // Handle PDF files
     if (isPdf) {
       // For PDFs, show a preview with download button instead of auto-rendering
       return (
@@ -69,14 +81,14 @@ const Admin = () => {
               <a 
                 href={u} 
                 target="_blank" 
-                rel="noopener noreferrer"
+                rel="noopener noreferrer nofollow"
                 className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
                 View PDF
               </a>
               <a 
-                href={u} 
+                href={`${u}${u.includes('?') ? '&' : '?'}dl=1`} 
                 download
                 className="px-3 py-1.5 text-sm border rounded-md hover:bg-muted transition-colors"
                 onClick={(e) => e.stopPropagation()}
@@ -325,7 +337,7 @@ const Admin = () => {
                             <div className="space-y-2">
                               <p className="font-medium">Consent File</p>
                               <div className="rounded border bg-background p-2">
-                                {renderFilePreview(String(item.consent.fileUrl))}
+                                {renderFilePreview(String(item.consent.fileUrl), 'pdf')}
                               </div>
                             </div>
                           )}

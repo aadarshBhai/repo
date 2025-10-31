@@ -5,30 +5,69 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Normalize media URLs so absolute localhost/backend URLs become relative
-// This lets Netlify proxy '/uploads/*' to the backend seamlessly
-export function mediaSrc(u?: string) {
+// Normalize media URLs and handle missing files gracefully
+export function mediaSrc(u?: string): string {
   if (!u) return "";
+  
   try {
-    // If it's already a relative path, return as-is
-    if (u.startsWith("/")) return u;
-    // If it's a bare filename (no scheme, no leading slash), assume legacy local upload
-    // and prefix with '/uploads/' so Netlify proxies to backend static server
+    // If it's already a relative path, ensure it has the correct prefix
+    if (u.startsWith("/")) {
+      // Check if it's a local upload path
+      if (u.startsWith("/uploads/")) {
+        // For local uploads, we'll handle the missing file case in the UI
+        return u;
+      }
+      return u;
+    }
+
+    // Handle Cloudinary URLs
+    if (u.includes('res.cloudinary.com')) {
+      const url = new URL(u);
+      const path = url.pathname;
+      
+      // For PDFs, ensure we're using the raw/upload endpoint
+      if (/\.pdf(\?|#|$)/i.test(path)) {
+        return u.replace(/\/image\/upload\//i, "/raw/upload/");
+      }
+      
+      // Add parameters to prevent auto-download for Cloudinary
+      if (!url.search) {
+        url.search = '?'; 
+      } else if (!url.search.endsWith('&')) {
+        url.search += '&';
+      }
+      
+      // Add flags to prevent auto-download
+      url.search += 'dl=0&_i=AA';
+      
+      return url.toString();
+    }
+
+    // Handle local file paths
     if (!/^https?:\/\//i.test(u)) {
-      // Avoid double prefix if it already contains 'uploads/' without leading slash
-      if (u.startsWith("uploads/")) return `/${u}`;
-      return `/uploads/${u}`;
+      // This is a bare filename, treat as local upload
+      return `/uploads/${u.replace(/^uploads\//, '')}`;
     }
-    const url = new URL(u, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
-    const path = `${url.pathname}${url.search}${url.hash}`;
-    if (path.startsWith("/uploads/")) return path;
-    // Cloudinary PDF fix: ensure raw delivery for PDFs (avoid image/upload 401)
-    const isCloudinary = /(^|\.)res\.cloudinary\.com$/i.test(url.hostname);
-    if (isCloudinary && /\.pdf(\?|#|$)/i.test(path) && /\/image\/upload\//i.test(path)) {
-      return u.replace(/\/image\/upload\//i, "/raw/upload/");
+
+    // For other URLs, return as-is but add no-download params if it's a direct file
+    const url = new URL(u);
+    if (/\.(pdf|docx?|xlsx?|pptx?|mp4|mp3|wav|ogg|mov|avi|webm|zip|rar|7z)(\?|#|$)/i.test(url.pathname)) {
+      if (!url.search) url.search = '?';
+      if (!url.search.includes('dl=')) {
+        url.search += (url.search === '?' ? '' : '&') + 'dl=0';
+      }
+      return url.toString();
     }
+
     return u;
-  } catch {
+  } catch (error) {
+    console.error('Error processing media URL:', error);
     return u;
   }
+}
+
+// Check if a URL points to a potentially downloadable file
+export function isFileUrl(url: string): boolean {
+  if (!url) return false;
+  return /\.(pdf|docx?|xlsx?|pptx?|mp4|mp3|wav|ogg|mov|avi|webm|zip|rar|7z)(\?|#|$)/i.test(url);
 }
