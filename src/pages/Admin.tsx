@@ -5,19 +5,58 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import Footer from "@/components/Footer";
 import { FileText, CheckCircle, XCircle, Users } from "lucide-react";
-import { mediaSrc } from "@/lib/utils";
+import { mediaSrc, isFileUrl } from "@/lib/utils";
  
 
 const Admin = () => {
   const [activeSection, setActiveSection] = useState("pending");
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [items, setItems] = useState<any[]>([]);
+  interface Submission {
+    _id: string;
+    title: string;
+    description?: string;
+    type?: string;
+    contentUrl?: string;
+    text?: string;
+    status: string;
+    consent?: {
+      name: string;
+      given: boolean;
+      relation?: string;
+      fileUrl?: string;
+    };
+    category?: string;
+    tribe?: string;
+    createdAt?: string;
+  }
+
+  interface User {
+    _id: string;
+    name?: string;
+    email: string;
+    createdAt?: string;
+  }
+
+  const [items, setItems] = useState<Array<Submission | User>>([]);
   const [loading, setLoading] = useState(false);
 
-  const renderConsentPreview = (url: string) => {
+  const renderFilePreview = (url: string, type?: string) => {
     const u = mediaSrc(url);
+    
+    // Handle missing or invalid URLs
+    if (!url || !u) {
+      return (
+        <div className="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded">
+          File not available
+        </div>
+      );
+    }
+    
     const isPdf = /\.pdf(\?|$)/i.test(u);
+    const isImage = /(\.(png|jpe?g|gif|webp|bmp|svg)(\?|$))/i.test(u);
+    const isVideo = /(\.(mp4|webm|ogg|mov|avi)(\?|$))/i.test(u);
+    const isAudio = /(\.(mp3|wav|ogg)(\?|$))/i.test(u);
     
     if (isPdf) {
       // For PDFs, show a preview with download button instead of auto-rendering
@@ -50,27 +89,58 @@ const Admin = () => {
       );
     }
 
-    // For images
-    if (/(\.(png|jpe?g|gif|webp|bmp|svg)(\?|$))/i.test(u)) {
-      return <img src={u} alt="Consent file" className="w-full h-auto rounded" />;
+    if (isImage) {
+      return (
+        <img 
+          src={u} 
+          alt="File preview" 
+          className="w-full h-auto rounded" 
+          onError={(e) => {
+            const el = e.target as HTMLImageElement;
+            el.outerHTML = '<div class="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded">Image not found</div>';
+          }}
+        />
+      );
     }
-    
-    // For videos
-    if (/(\.(mp4|webm|ogg)(\?|$))/i.test(u)) {
-      return <video src={u} controls className="w-full rounded" />;
+
+    if (isVideo) {
+      return (
+        <div className="relative">
+          <video 
+            src={u} 
+            controls 
+            className="w-full rounded"
+            onError={(e) => {
+              const el = e.target as HTMLVideoElement;
+              el.outerHTML = '<div class="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded">Video not found</div>';
+            }}
+          />
+        </div>
+      );
     }
-    
-    // For audio
-    if (/(\.(mp3|wav|ogg)(\?|$))/i.test(u)) {
-      return <audio src={u} controls className="w-full" />;
+
+    if (isAudio) {
+      return (
+        <div className="relative">
+          <audio 
+            src={u} 
+            controls 
+            className="w-full"
+            onError={(e) => {
+              const el = e.target as HTMLAudioElement;
+              el.outerHTML = '<div class="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded">Audio not found</div>';
+            }}
+          />
+        </div>
+      );
     }
-    
-    // Fallback for other file types
+
+    // For other file types, show a download link
     return (
       <div className="space-y-2">
         <div className="p-4 border rounded bg-muted/20 text-center">
           <FileText className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground mb-3">Document Preview</p>
+          <p className="text-sm text-muted-foreground mb-3">Document</p>
           <a 
             href={u} 
             target="_blank" 
@@ -238,42 +308,8 @@ const Admin = () => {
                       <CardDescription className="line-clamp-2">{item.description}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {item.type === 'video' && item.contentUrl ? (
-                        <div className="relative">
-                          <video 
-                            src={mediaSrc(item.contentUrl)} 
-                            controls 
-                            className="w-full rounded"
-                            onError={(e) => {
-                              const el = e.target as HTMLVideoElement;
-                              el.outerHTML = '<div class="p-4 text-center text-sm text-muted-foreground bg-muted/50 rounded">Video file not found</div>';
-                            }}
-                          />
-                        </div>
-                      ) : item.type === 'audio' && item.contentUrl ? (
-                        <div className="relative">
-                          <audio 
-                            src={mediaSrc(item.contentUrl)} 
-                            controls 
-                            className="w-full"
-                            onError={(e) => {
-                              const el = e.target as HTMLAudioElement;
-                              el.outerHTML = '<div class="p-4 text-center text-sm text-muted-foreground bg-muted/50 rounded">Audio file not found</div>';
-                            }}
-                          />
-                        </div>
-                      ) : item.type === 'text' && item.contentUrl && /\.pdf(\?|$)/i.test(item.contentUrl) ? (
-                        <div className="w-full">
-                          <iframe
-                            src={mediaSrc(item.contentUrl)}
-                            title="PDF preview"
-                            className="w-full h-80 border rounded"
-                            onError={(e) => {
-                              const el = e.target as HTMLIFrameElement;
-                              el.outerHTML = '<div class="p-4 text-center text-sm text-muted-foreground bg-muted/50 rounded">PDF file not found</div>';
-                            }}
-                          />
-                        </div>
+                      {item.contentUrl ? (
+                        renderFilePreview(item.contentUrl, item.type)
                       ) : item.type === 'text' && item.text ? (
                         <p className="text-sm leading-relaxed whitespace-pre-wrap max-h-40 overflow-auto">{item.text}</p>
                       ) : (
@@ -289,7 +325,7 @@ const Admin = () => {
                             <div className="space-y-2">
                               <p className="font-medium">Consent File</p>
                               <div className="rounded border bg-background p-2">
-                                {renderConsentPreview(String(item.consent.fileUrl))}
+                                {renderFilePreview(String(item.consent.fileUrl))}
                               </div>
                             </div>
                           )}
