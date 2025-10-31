@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import submissionsRoutes from "./routes/submissions.js";
+import approvedRoutes from "./routes/approved.js";
 import uploadsRoutes from "./routes/uploads.js";
 import referenceRoutes from "./routes/reference.js";
 import path from "path";
@@ -21,14 +22,28 @@ dotenv.config({ path: path.join(__dirname, ".env"), override: true });
 
 const app = express();
 
+// ===== CORS Configuration =====
+const corsOptions = {
+  origin: [
+    'http://localhost:8080',
+    'https://nagarepo.netlify.app',
+    'https://nagarepo.netlify.app/upload',
+    'https://nagarepo.netlify.app/explore'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
 // ===== Middleware =====
-app.use(cors());
-app.use(express.json());
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '50mb' }));
 
 // ===== API Routes =====
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/submissions", submissionsRoutes);
+app.use("/api/approved", approvedRoutes);
 app.use("/api/uploads", uploadsRoutes);
 app.use("/api/reference", referenceRoutes);
 app.use("/api/collab", collaborationRoutes);

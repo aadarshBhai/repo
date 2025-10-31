@@ -68,13 +68,29 @@ const regionsByCountry: Record<string, string[]> = {
   ],
 };
 
+// Predefined lists of villages and tribes
+const PREDEFINED_VILLAGES = [
+  'Khonomo', 'Longwa', 'Touphema', 'Mokokchung', 'Pfutsero', 
+  'Reiek', 'Nongriat', 'Nongkynrih', 'Ziro', 'Hong', 
+  'Bhitarkanika', 'Bastar', 'Patangarh', 'Tejgadh', 'Mandla', 
+  'Dzongu', 'Mon', 'Cherrapunji', 'Tawang', 'Chilapata'
+];
+
+const PREDEFINED_TRIBES = [
+  'Angami', 'Ao', 'Sema (Sümi)', 'Lotha', 'Chakhesang', 
+  'Konyak', 'Rengma', 'Phom', 'Chang', 'Sangtam', 
+  'Khiamniungan', 'Yimchunger', 'Zeliang', 'Pochury', 'Mizo', 
+  'Khasi', 'Garo', 'Apatani', 'Nyishi', 'Lepcha', 
+  'Bhil', 'Santhal', 'Bodo', 'Mishing'
+];
+
 const Explore = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [items, setItems] = useState<any[]>([]);
-  const [tribeOptions, setTribeOptions] = useState<string[]>([]);
+  const [tribeOptions, setTribeOptions] = useState<string[]>(PREDEFINED_TRIBES);
   const [tribesLoading, setTribesLoading] = useState(false);
-  const [villageOptions, setVillageOptions] = useState<string[]>([]);
+  const [villageOptions, setVillageOptions] = useState<string[]>(PREDEFINED_VILLAGES);
   const [villagesLoading, setVillagesLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -150,20 +166,27 @@ const Explore = () => {
     (async () => {
       setTribesLoading(true);
       try {
-        // Reset existing when no country or state
-        if (!country || !stateRegion) {
-          if (active) setTribeOptions([]);
-          return;
+        // Always include predefined tribes
+        let tribes = [...PREDEFINED_TRIBES];
+        
+        // If country and state are selected, fetch additional tribes from the backend
+        if (country && stateRegion) {
+          const qs = new URLSearchParams();
+          qs.set("country", country);
+          qs.set("state", stateRegion);
+          const res = await fetch(`/api/submissions/tribes?${qs.toString()}`);
+          const data = await res.json();
+          if (res.ok && Array.isArray(data)) {
+            // Combine predefined tribes with backend tribes, removing duplicates
+            const backendTribes = data.map(String).filter(Boolean);
+            tribes = Array.from(new Set([...tribes, ...backendTribes]));
+          }
         }
-        const qs = new URLSearchParams();
-        qs.set("country", country);
-        qs.set("state", stateRegion);
-        const res = await fetch(`/api/submissions/tribes?${qs.toString()}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.errors?.[0]?.msg || "Failed to load tribes");
-        if (active) setTribeOptions(Array.isArray(data) ? data : []);
+        
+        if (active) setTribeOptions(tribes);
       } catch (_e) {
-        if (active) setTribeOptions([]);
+        // Fallback to just predefined tribes on error
+        if (active) setTribeOptions(PREDEFINED_TRIBES);
       } finally {
         if (active) setTribesLoading(false);
       }
@@ -177,36 +200,50 @@ const Explore = () => {
     (async () => {
       setVillagesLoading(true);
       try {
-        // If tribe selected, prefer DB-driven villages
+        // Always include predefined villages
+        let villages = [...PREDEFINED_VILLAGES];
+        
+        // If tribe selected, try to get villages for that tribe
         if (tribe) {
           const qs = new URLSearchParams();
           qs.set("tribe", tribe);
           if (country) qs.set("country", country);
           if (stateRegion) qs.set("state", stateRegion);
-          const res = await fetch(`/api/submissions/villages?${qs.toString()}`);
-          const data = await res.json();
-          if (active) {
-            if (Array.isArray(data) && data.length > 0) {
-              setVillageOptions(data);
-              return;
+          
+          try {
+            const res = await fetch(`/api/submissions/villages?${qs.toString()}`);
+            const data = await res.json();
+            if (res.ok && Array.isArray(data) && data.length > 0) {
+              // Combine predefined villages with backend villages, removing duplicates
+              const backendVillages = data.map(String).filter(Boolean);
+              villages = Array.from(new Set([...villages, ...backendVillages]));
             }
-            // Fall through to reference if none
+          } catch (_e) {
+            // Ignore errors, we still have predefined villages
+          }
+        } 
+        // If no tribe but country and state are selected, try to get reference villages
+        else if (country && stateRegion) {
+          try {
+            const qs2 = new URLSearchParams();
+            qs2.set('country', country);
+            qs2.set('state', stateRegion);
+            const res2 = await fetch(`/api/reference/villages?${qs2.toString()}`);
+            const data2 = await res2.json();
+            if (res2.ok && Array.isArray(data2)) {
+              // Combine predefined villages with reference villages, removing duplicates
+              const referenceVillages = data2.map(String).filter(Boolean);
+              villages = Array.from(new Set([...villages, ...referenceVillages]));
+            }
+          } catch (_e) {
+            // Ignore errors, we still have predefined villages
           }
         }
-
-        // No tribe or no DB villages: use curated reference for India by state
-        if (country && stateRegion) {
-          const qs2 = new URLSearchParams();
-          qs2.set('country', country);
-          qs2.set('state', stateRegion);
-          const res2 = await fetch(`/api/reference/villages?${qs2.toString()}`);
-          const data2 = await res2.json();
-          if (active) setVillageOptions(Array.isArray(data2) ? data2 : []);
-          return;
-        }
-        if (active) setVillageOptions([]);
+        
+        if (active) setVillageOptions(villages);
       } catch (_e) {
-        if (active) setVillageOptions([]);
+        // Fallback to just predefined villages on error
+        if (active) setVillageOptions(PREDEFINED_VILLAGES);
       } finally {
         if (active) setVillagesLoading(false);
       }
@@ -325,81 +362,160 @@ const Explore = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="w-[140px] min-w-0">
+            <div className="w-[160px] min-w-0">
               <div className="relative">
-                <Input
-                  value={tribe}
-                  onChange={(e) => changeParam("tribe", e.target.value)}
-                  placeholder={!country || !stateRegion ? "Select country/state" : "Type tribe…"}
-                  aria-label="Tribe"
-                  disabled={!country || !stateRegion}
-                  autoComplete="off"
-                  onFocus={() => setTribeFocused(true)}
-                  onBlur={() => setTimeout(() => setTribeFocused(false), 150)}
-                />
+                <div className="relative">
+                  <Input
+                    value={tribe}
+                    onChange={(e) => changeParam("tribe", e.target.value)}
+                    placeholder={!country || !stateRegion ? "Select country/state" : "Search tribe…"}
+                    aria-label="Search tribe"
+                    disabled={!country || !stateRegion}
+                    autoComplete="off"
+                    onFocus={() => setTribeFocused(true)}
+                    onBlur={() => setTimeout(() => setTribeFocused(false), 150)}
+                    className="pr-8"
+                  />
+                  {tribe && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        changeParam("tribe", "");
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x">
+                        <path d="M18 6 6 18"/>
+                        <path d="m6 6 12 12"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                
                 {(tribeFocused || Boolean(tribe)) && !tribesLoading && tribeOptions.length > 0 && (
                   <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
-                    {Array.from(new Set(
-                        tribeOptions
-                          .filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase()))
-                          .map((t) => String(t).toLowerCase())
-                      ))
+                    {tribeOptions
+                      .filter((t) => 
+                        String(t).toLowerCase().includes(tribe.toLowerCase())
+                      )
+                      .sort()
                       .slice(0, 8)
                       .map((t) => (
                         <button
                           type="button"
                           key={t}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                          onClick={() => changeParam("tribe", String(t).toLowerCase())}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                          onClick={() => {
+                            changeParam("tribe", String(t));
+                            setTribeFocused(false);
+                          }}
                         >
-                          {t}
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                          </svg>
+                          <span className="truncate">{t}</span>
                         </button>
                       ))}
-                    {tribeOptions.filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase())).length === 0 && (
-                      <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
+                    {tribeOptions.filter(t => 
+                      String(t).toLowerCase().includes(tribe.toLowerCase())
+                    ).length === 0 && (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        {tribe ? "No matching tribes found" : "Type to search tribes"}
+                      </div>
                     )}
                   </div>
                 )}
               </div>
-              {tribesLoading && <div className="text-[10px] text-muted-foreground mt-1">Loading tribes…</div>}
+              {tribesLoading && (
+                <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                  <svg className="animate-spin h-3 w-3 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading tribes…
+                </div>
+              )}
             </div>
-            <div className="w-[140px] min-w-0">
+
+            <div className="w-[160px] min-w-0">
               <div className="relative">
-                <Input
-                  value={village}
-                  onChange={(e) => changeParam("village", e.target.value)}
-                  placeholder={!country || !stateRegion ? "Select country/state first" : "Type village…"}
-                  aria-label="Village"
-                  disabled={!country || !stateRegion}
-                  autoComplete="off"
-                  onFocus={() => setVillageFocused(true)}
-                  onBlur={() => setTimeout(() => setVillageFocused(false), 150)}
-                />
+                <div className="relative">
+                  <Input
+                    value={village}
+                    onChange={(e) => changeParam("village", e.target.value)}
+                    placeholder={!country || !stateRegion ? "Select country/state" : "Search village…"}
+                    aria-label="Search village"
+                    disabled={!country || !stateRegion}
+                    autoComplete="off"
+                    onFocus={() => setVillageFocused(true)}
+                    onBlur={() => setTimeout(() => setVillageFocused(false), 150)}
+                    className="pr-8"
+                  />
+                  {village && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        changeParam("village", "");
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x">
+                        <path d="M18 6 6 18"/>
+                        <path d="m6 6 12 12"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                
                 {(villageFocused || Boolean(village)) && !villagesLoading && villageOptions.length > 0 && (
                   <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
-                    {Array.from(new Set(
-                        villageOptions
-                          .filter((v) => String(v).toLowerCase().includes(village.toLowerCase()))
-                          .map((v) => String(v))
-                      ))
+                    {villageOptions
+                      .filter((v) => 
+                        String(v).toLowerCase().includes(village.toLowerCase())
+                      )
+                      .sort()
                       .slice(0, 8)
                       .map((v) => (
                         <button
                           type="button"
-                          key={String(v)}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                          onClick={() => changeParam("village", String(v))}
+                          key={v}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+                          onClick={() => {
+                            changeParam("village", String(v));
+                            setVillageFocused(false);
+                          }}
                         >
-                          {String(v)}
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-home">
+                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                          </svg>
+                          <span className="truncate">{v}</span>
                         </button>
                       ))}
-                    {villageOptions.filter((vv) => String(vv).toLowerCase().includes(village.toLowerCase())).length === 0 && (
-                      <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
+                    {villageOptions.filter(v => 
+                      String(v).toLowerCase().includes(village.toLowerCase())
+                    ).length === 0 && (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        {village ? "No matching villages found" : "Type to search villages"}
+                      </div>
                     )}
                   </div>
                 )}
               </div>
-              {villagesLoading && <div className="text-[10px] text-muted-foreground mt-1">Loading villages…</div>}
+              {villagesLoading && (
+                <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                  <svg className="animate-spin h-3 w-3 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading villages…
+                </div>
+              )}
             </div>
             <div className="flex gap-2 shrink-0">
               <Button className="w-full sm:w-auto" variant="outline" onClick={() => setSearchParams({}, { replace: true })}>Reset</Button>

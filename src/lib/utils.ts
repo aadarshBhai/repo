@@ -27,7 +27,19 @@ export function mediaSrc(u?: string): string {
       
       // For PDFs, ensure we're using the raw/upload endpoint
       if (/\.pdf(\?|#|$)/i.test(path)) {
-        return u.replace(/\/image\/upload\//i, "/raw/upload/");
+        // Check if the URL has the /uploads/ segment which might be causing 404
+        const pathParts = path.split('/');
+        const uploadsIndex = pathParts.findIndex(part => part === 'uploads');
+        
+        if (uploadsIndex > -1) {
+          // Rebuild the path without the /uploads/ segment
+          const newPath = [...pathParts.slice(0, uploadsIndex), ...pathParts.slice(uploadsIndex + 1)].join('/');
+          url.pathname = newPath;
+          u = url.toString();
+        }
+        
+        // Ensure we're using the raw/upload endpoint
+        return u.replace(/\/(image|video)\/upload\//i, "/raw/upload/");
       }
       
       // Add parameters to prevent auto-download for Cloudinary

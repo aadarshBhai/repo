@@ -1,6 +1,8 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import Submission from '../models/Submission.js';
+import ApprovedContent from '../models/ApprovedContent.js';
 import User from '../models/User.js';
 
 const router = express.Router();
@@ -46,10 +48,31 @@ function requireAdmin(req, res, next) {
 // List submissions by status (default: pending)
 router.get('/submissions', requireAdmin, async (req, res) => {
   try {
-    const status = req.query.status || 'pending';
-    const items = await Submission.find({ status }).sort({ createdAt: -1 });
-    res.json(items);
+    const { status = 'pending', limit = 20, skip = 0, search } = req.query;
+    
+    const query = { status };
+    
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { 'user.name': { $regex: search, $options: 'i' } },
+        { 'user.email': { $regex: search, $options: 'i' } },
+      ];
+    }
+    
+    const [items, total] = await Promise.all([
+      Submission.find(query)
+        .populate('userId', 'name email')
+        .sort({ createdAt: -1 })
+        .skip(parseInt(skip))
+        .limit(parseInt(limit)),
+      Submission.countDocuments(query)
+    ]);
+    
+    res.json({ items, total });
   } catch (e) {
+    console.error('Error fetching submissions:', e);
     res.status(500).json({ errors: [{ msg: 'Server error' }] });
   }
 });
@@ -66,15 +89,42 @@ router.get('/submissions/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// Approve a submission
+// Approve a submission and move to approved content
 router.patch('/submissions/:id/approve', requireAdmin, async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
   try {
-    const { id } = req.params;
-    const doc = await Submission.findByIdAndUpdate(id, { status: 'approved' }, { new: true });
-    if (!doc) return res.status(404).json({ errors: [{ msg: 'Not found' }] });
-    res.json(doc);
+    // Find and lock the submission
+    const submission = await Submission.findById(req.params.id).session(session);
+    if (!submission) {
+      await session.abortTransaction();
+      return res.status(404).json({ errors: [{ msg: 'Submission not found' }] });
+    }
+
+    // Create approved content entry
+    const approvedContent = new ApprovedContent({
+      ...submission.toObject(),
+      _id: submission._id, // Keep the same ID
+      status: 'approved',
+      approvedAt: new Date(),
+      approvedBy: req.userId,
+    });
+    
+    await approvedContent.save({ session });
+    
+    // Update submission status
+    submission.status = 'approved';
+    await submission.save({ session });
+    
+    await session.commitTransaction();
+    res.json({ message: 'Submission approved and moved to approved content', data: approvedContent });
   } catch (e) {
+    await session.abortTransaction();
+    console.error('Error approving submission:', e);
     res.status(500).json({ errors: [{ msg: 'Server error' }] });
+  } finally {
+    session.endSession();
   }
 });
 
@@ -82,10 +132,27 @@ router.patch('/submissions/:id/approve', requireAdmin, async (req, res) => {
 router.patch('/submissions/:id/reject', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const doc = await Submission.findByIdAndUpdate(id, { status: 'rejected' }, { new: true });
+    const { reason } = req.body;
+    
+    const doc = await Submission.findByIdAndUpdate(
+      id, 
+      { 
+        status: 'rejected',
+        rejectionReason: reason || '',
+        rejectedAt: new Date(),
+        rejectedBy: req.userId
+      }, 
+      { new: true }
+    );
+    
     if (!doc) return res.status(404).json({ errors: [{ msg: 'Not found' }] });
-    res.json(doc);
+    
+    res.json({ 
+      message: 'Submission rejected' + (reason ? ': ' + reason : ''),
+      data: doc 
+    });
   } catch (e) {
+    console.error('Error rejecting submission:', e);
     res.status(500).json({ errors: [{ msg: 'Server error' }] });
   }
 });
@@ -126,4 +193,3 @@ router.delete('/users/:id', requireAdmin, async (req, res) => {
 });
 
 export default router;
-

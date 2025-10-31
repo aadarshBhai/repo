@@ -294,7 +294,7 @@ const Admin = () => {
               <p className="text-muted-foreground">No items to display.</p>
             ) : activeSection === 'users' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {items.map((user) => (
+                {(items as User[]).map((user) => (
                   <Card key={user._id} className="card-texture">
                     <CardHeader>
                       <CardTitle className="text-xl line-clamp-1">{user.name || 'Unnamed User'}</CardTitle>
@@ -313,7 +313,7 @@ const Admin = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {items.map((item) => (
+                {(items as Submission[]).map((item) => (
                   <Card key={item._id} className="card-texture">
                     <CardHeader>
                       <CardTitle className="text-xl line-clamp-1">{item.title}</CardTitle>
@@ -375,7 +375,6 @@ const Admin = () => {
           </div>
         </main>
       </div>
-      
       <Footer />
     </div>
   );
