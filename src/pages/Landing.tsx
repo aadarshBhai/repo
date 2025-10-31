@@ -160,7 +160,7 @@ const Landing = () => {
       <section ref={roadmapRef} className="relative py-16 md:py-24 bg-muted/3 border-t border-border/60">
         <div className="relative max-w-6xl mx-auto px-4">
           <div className="mb-8 md:mb-12 text-center">
-            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">3. Heritage Repository Roadmap</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold heading-accent inline-block">Heritage Repository Roadmap</h2>
             <p className="mt-3 md:mt-4 text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">A clear path from collection to publication.</p>
             <p className="mt-2 text-xs md:text-sm text-muted-foreground max-w-3xl mx-auto">Every cultural submission follows a transparent, consent-based process to ensure authenticity and ethical cultural preservation.</p>
           </div>
