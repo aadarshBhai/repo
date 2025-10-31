@@ -47,6 +47,14 @@ const villagesByState = {
   ],
 };
 
+const preloadedVillages = [
+  'Khonoma', 'Longwa', 'Touphema', 'Mokokchung', 'Pfutsero', 'Reiek', 'Nongriat', 'Nongkynrih', 'Ziro', 'Hong', 'Bhitarkanika', 'Bastar', 'Patangarh', 'Tejgadh', 'Mandla', 'Dzongu', 'Mon', 'Cherrapunji', 'Tawang', 'Chilapata'
+];
+
+const preloadedTribes = [
+  'Angami', 'Ao', 'Sema (Sümi)', 'Lotha', 'Chakhesang', 'Konyak', 'Rengma', 'Phom', 'Chang', 'Sangtam', 'Khiamniungan', 'Yimchunger', 'Zeliang', 'Pochury', 'Mizo', 'Khasi', 'Garo', 'Apatani', 'Nyishi', 'Lepcha', 'Bhil', 'Santhal', 'Bodo', 'Mishing'
+];
+
 // GET /api/reference/villages?country=India&state=Odisha
 router.get('/villages', (req, res) => {
   try {
@@ -57,6 +65,22 @@ router.get('/villages', (req, res) => {
     if (!state) return res.json([]);
     const list = villagesByState[state] || [];
     res.json(list);
+  } catch (e) {
+    res.status(500).json({ errors: [{ msg: 'Server error' }] });
+  }
+});
+
+router.get('/preloaded-tribes', (_req, res) => {
+  try {
+    res.json(preloadedTribes);
+  } catch (e) {
+    res.status(500).json({ errors: [{ msg: 'Server error' }] });
+  }
+});
+
+router.get('/preloaded-villages', (_req, res) => {
+  try {
+    res.json(preloadedVillages);
   } catch (e) {
     res.status(500).json({ errors: [{ msg: 'Server error' }] });
   }

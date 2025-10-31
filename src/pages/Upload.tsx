@@ -36,6 +36,8 @@ const Upload = () => {
   const [tribesLoading, setTribesLoading] = useState(false);
   const [villageOptions, setVillageOptions] = useState<string[]>([]);
   const [villagesLoading, setVillagesLoading] = useState(false);
+  const [preloadedTribes, setPreloadedTribes] = useState<string[]>([]);
+  const [preloadedVillages, setPreloadedVillages] = useState<string[]>([]);
 
   const categories = [
     "Folktales",
@@ -128,6 +130,29 @@ const Upload = () => {
     return () => { active = false; };
   }, [tribe, country, stateRegion]);
 
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const [tRes, vRes] = await Promise.all([
+          fetch('/api/reference/preloaded-tribes'),
+          fetch('/api/reference/preloaded-villages'),
+        ]);
+        const [tData, vData] = await Promise.all([tRes.json(), vRes.json()]);
+        if (active) {
+          setPreloadedTribes(Array.isArray(tData) ? tData : []);
+          setPreloadedVillages(Array.isArray(vData) ? vData : []);
+        }
+      } catch (_) {
+        if (active) {
+          setPreloadedTribes([]);
+          setPreloadedVillages([]);
+        }
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
   // No localStorage persistence; keep in-memory only
 
   return (
@@ -204,20 +229,16 @@ const Upload = () => {
                   <div className="relative">
                     <Input
                       id="tribe"
-                      placeholder={!country || !stateRegion ? "Select country/state first" : "Start typing tribe…"}
+                      placeholder={"Start typing tribe…"}
                       value={tribe}
                       onChange={(e) => setTribe(e.target.value)}
-                      disabled={!country || !stateRegion}
                       autoComplete="off"
                     />
                     {/* Suggestions */}
-                    {Boolean(tribe) && !tribesLoading && tribeOptions.length > 0 && (
+                    {Boolean(tribe) && !tribesLoading && (new Set([...(preloadedTribes||[]), ...(tribeOptions||[])]).size > 0) && (
                       <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
-                        {Array.from(new Set(
-                            tribeOptions
-                              .filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase()))
-                              .map((t) => String(t).toLowerCase())
-                          ))
+                        {Array.from(new Set([...(preloadedTribes||[]), ...(tribeOptions||[])].map((t) => String(t).toLowerCase())))
+                          .filter((t) => t.includes(tribe.toLowerCase()))
                           .slice(0, 8)
                           .map((t) => (
                             <button
@@ -229,7 +250,8 @@ const Upload = () => {
                               {t}
                             </button>
                           ))}
-                        {tribeOptions.filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase())).length === 0 && (
+                        {Array.from(new Set([...(preloadedTribes||[]), ...(tribeOptions||[])]))
+                          .filter((t) => String(t).toLowerCase().includes(tribe.toLowerCase())).length === 0 && (
                           <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
                         )}
                       </div>
@@ -249,13 +271,10 @@ const Upload = () => {
                       onChange={(e) => setVillage(e.target.value)}
                       autoComplete="off"
                     />
-                    {Boolean(village) && !villagesLoading && villageOptions.length > 0 && (
+                    {Boolean(village) && !villagesLoading && (new Set([...(preloadedVillages||[]), ...(villageOptions||[])]).size > 0) && (
                       <div className="absolute z-20 mt-1 w-full max-h-56 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
-                        {Array.from(new Set(
-                            villageOptions
-                              .filter((v) => String(v).toLowerCase().includes(village.toLowerCase()))
-                              .map((v) => String(v))
-                          ))
+                        {Array.from(new Set([...(preloadedVillages||[]), ...(villageOptions||[])]))
+                          .filter((v) => String(v).toLowerCase().includes(village.toLowerCase()))
                           .slice(0, 8)
                           .map((v) => (
                             <button
@@ -267,7 +286,8 @@ const Upload = () => {
                               {String(v)}
                             </button>
                           ))}
-                        {villageOptions.filter((v) => String(v).toLowerCase().includes(village.toLowerCase())).length === 0 && (
+                        {Array.from(new Set([...(preloadedVillages||[]), ...(villageOptions||[])]))
+                          .filter((v) => String(v).toLowerCase().includes(village.toLowerCase())).length === 0 && (
                           <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
                         )}
                       </div>
