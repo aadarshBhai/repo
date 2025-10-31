@@ -190,15 +190,39 @@ const Admin = () => {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {item.type === 'video' && item.contentUrl ? (
-                        <video src={mediaSrc(item.contentUrl)} controls className="w-full rounded" />
+                        <div className="relative">
+                          <video 
+                            src={mediaSrc(item.contentUrl)} 
+                            controls 
+                            className="w-full rounded"
+                            onError={(e) => {
+                              const el = e.target as HTMLVideoElement;
+                              el.outerHTML = '<div class="p-4 text-center text-sm text-muted-foreground bg-muted/50 rounded">Video file not found</div>';
+                            }}
+                          />
+                        </div>
                       ) : item.type === 'audio' && item.contentUrl ? (
-                        <audio src={mediaSrc(item.contentUrl)} controls className="w-full" />
+                        <div className="relative">
+                          <audio 
+                            src={mediaSrc(item.contentUrl)} 
+                            controls 
+                            className="w-full"
+                            onError={(e) => {
+                              const el = e.target as HTMLAudioElement;
+                              el.outerHTML = '<div class="p-4 text-center text-sm text-muted-foreground bg-muted/50 rounded">Audio file not found</div>';
+                            }}
+                          />
+                        </div>
                       ) : item.type === 'text' && item.contentUrl && /\.pdf(\?|$)/i.test(item.contentUrl) ? (
                         <div className="w-full">
                           <iframe
                             src={mediaSrc(item.contentUrl)}
                             title="PDF preview"
                             className="w-full h-80 border rounded"
+                            onError={(e) => {
+                              const el = e.target as HTMLIFrameElement;
+                              el.outerHTML = '<div class="p-4 text-center text-sm text-muted-foreground bg-muted/50 rounded">PDF file not found</div>';
+                            }}
                           />
                         </div>
                       ) : item.type === 'text' && item.text ? (
