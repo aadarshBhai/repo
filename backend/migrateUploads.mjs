@@ -6,8 +6,12 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import cloudinary from "cloudinary";
 
-// Load environment variables
-dotenv.config({ path: path.join(process.cwd(), ".env") });
+// Get __dirname in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables safely from backend/.env
+dotenv.config({ path: path.join(__dirname, ".env"), override: true });
 
 // Cloudinary configuration
 cloudinary.v2.config({
@@ -15,10 +19,6 @@ cloudinary.v2.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
-// Get __dirname in ES module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Mongoose Upload model
 const uploadSchema = new mongoose.Schema({
@@ -32,7 +32,8 @@ const Upload = mongoose.model("Upload", uploadSchema);
 
 async function migrateUploads() {
   try {
-    if (!process.env.MONGODB_URI) throw new Error("MONGODB_URI not set in .env");
+    if (!process.env.MONGODB_URI)
+      throw new Error("MONGODB_URI not set in .env");
 
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("✅ Connected to MongoDB Atlas");
@@ -62,9 +63,12 @@ async function migrateUploads() {
     }
 
     console.log("🎉 Migration complete");
-    mongoose.disconnect();
+    await mongoose.disconnect();
   } catch (err) {
     console.error("❌ Error migrating uploads:", err);
+    try {
+      await mongoose.disconnect();
+    } catch {}
   }
 }
 

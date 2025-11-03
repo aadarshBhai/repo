@@ -68,6 +68,14 @@ function requireAuth(req, res, next) {
 // Upload to Cloudinary with proper resource type detection
 async function uploadToCloudinary(buffer, originalname) {
   return new Promise((resolve, reject) => {
+    console.log(`Preparing to upload ${originalname} to Cloudinary`);
+    
+    // Validate input
+    if (!buffer || !originalname) {
+      console.error('Invalid input to uploadToCloudinary');
+      return reject(new Error('Invalid file data'));
+    }
+    
     // Determine resource type from file extension
     const ext = originalname.split('.').pop().toLowerCase();
     let resourceType = 'auto';
@@ -76,30 +84,58 @@ async function uploadToCloudinary(buffer, originalname) {
       resourceType = 'image';
     } else if (['mp4', 'mov', 'avi', 'webm'].includes(ext)) {
       resourceType = 'video';
-    } else if (['mp3', 'wav', 'ogg'].includes(ext)) {
+    } else if (['mp3', 'wav', 'ogg', 'm4a'].includes(ext)) {
       resourceType = 'video'; // Cloudinary treats audio as video type
+    } else if (ext === 'pdf') {
+      resourceType = 'raw';
     }
+    
+    console.log(`Detected resource type: ${resourceType}, extension: ${ext}`);
 
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: resourceType,
-        folder: 'heritage-repo',
-        public_id: `${Date.now()}-${originalname.replace(/\.[^/.]+$/, '')}`,
-        overwrite: false,
-        unique_filename: true,
-        chunk_size: 6000000, // 6MB chunks for large files
-        eager: resourceType === 'image' ? [
+    const publicId = `${Date.now()}-${originalname.replace(/\.[^/.]+$/, '').toLowerCase().replace(/[^a-z0-9-]/g, '-')}`;
+    console.log(`Uploading with public_id: ${publicId}`);
+    
+    const uploadOptions = {
+      resource_type: resourceType,
+      folder: 'heritage-repo',
+      public_id: publicId,
+      overwrite: false,
+      unique_filename: true,
+      chunk_size: 6000000, // 6MB chunks for large files
+      timeout: 120000, // 2 minutes timeout
+      ...(resourceType === 'image' && {
+        eager: [
           { width: 1000, crop: 'limit', quality: 'auto' }
-        ] : undefined
-      },
+        ]
+      })
+    };
+    
+    console.log('Upload options:', JSON.stringify(uploadOptions, null, 2));
+    
+    const uploadStream = cloudinary.uploader.upload_stream(
+      uploadOptions,
       (error, result) => {
         if (error) {
-          console.error('Cloudinary upload error:', error);
-          return reject(new Error(`Upload failed: ${error.message}`));
+          console.error('Cloudinary upload error details:', {
+            message: error.message,
+            http_code: error.http_code,
+            name: error.name,
+            status: error.status
+          });
+          return reject(new Error(`Upload failed: ${error.message || 'Unknown error'}`));
         }
         if (!result) {
+          console.error('No result object from Cloudinary');
           return reject(new Error('No result from Cloudinary'));
         }
+        
+        console.log('Cloudinary upload successful, result:', {
+          public_id: result.public_id,
+          format: result.format,
+          resource_type: result.resource_type,
+          bytes: result.bytes,
+          url: result.secure_url
+        });
         resolve({
           ...result,
           // Ensure secure URL
@@ -122,12 +158,16 @@ async function uploadToCloudinary(buffer, originalname) {
 
 // Handle file upload
 router.post('/', requireAuth, upload.single('file'), async (req, res) => {
+  console.log('File upload request received');
   try {
     if (!req.file) {
+      console.error('No file in request');
       return res.status(400).json({ 
         errors: [{ msg: 'No file was uploaded' }] 
       });
     }
+    
+    console.log(`Processing file: ${req.file.originalname} (${req.file.size} bytes)`);
 
     // Validate Cloudinary config
     const requiredVars = [
@@ -144,13 +184,22 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
       });
     }
 
+    console.log('Uploading to Cloudinary...');
     // Process the upload
-    const result = await uploadToCloudinary(
-      req.file.buffer, 
-      req.file.originalname
-    );
+    let result;
+    try {
+      result = await uploadToCloudinary(
+        req.file.buffer, 
+        req.file.originalname
+      );
+      console.log('Cloudinary upload successful:', result.secure_url);
+    } catch (uploadError) {
+      console.error('Cloudinary upload failed:', uploadError);
+      throw new Error(`Upload failed: ${uploadError.message}`);
+    }
 
-    if (!result.secure_url) {
+    if (!result || !result.secure_url) {
+      console.error('No secure URL in Cloudinary response:', result);
       throw new Error('Upload failed: No URL returned from Cloudinary');
     }
 
@@ -169,6 +218,18 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
 
   } catch (error) {
     console.error('Upload error:', error);
+    // Check for specific Cloudinary errors
+    if (error.message.includes('File size too large')) {
+      return res.status(413).json({
+        errors: [{ msg: 'File is too large. Maximum size is 200MB.' }]
+      });
+    }
+    if (error.message.includes('File type not allowed')) {
+      return res.status(400).json({
+        errors: [{ msg: 'This file type is not allowed.' }]
+      });
+    }
+    
     return res.status(500).json({ 
       errors: [{ 
         msg: error.message || 'Upload failed. Please try again.' 
