@@ -89,39 +89,64 @@ router.get('/submissions/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// Approve a submission and move to approved content
-router.patch('/submissions/:id/approve', requireAdmin, async (req, res) => {
+// Update submission status (approve/reject)
+router.patch('/submissions/:id/status', requireAdmin, async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   
   try {
+    const { status, reason } = req.body;
+    
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ errors: [{ msg: 'Invalid status. Must be "approved" or "rejected"' }] });
+    }
+    
     // Find and lock the submission
     const submission = await Submission.findById(req.params.id).session(session);
-    if (!submission) {
+    if (submission.status !== 'pending') {
       await session.abortTransaction();
-      return res.status(404).json({ errors: [{ msg: 'Submission not found' }] });
+      session.endSession();
+      return res.status(400).json({ errors: [{ msg: 'Submission already processed' }] });
     }
 
-    // Create approved content entry
-    const approvedContent = new ApprovedContent({
-      ...submission.toObject(),
-      _id: submission._id, // Keep the same ID
-      status: 'approved',
-      approvedAt: new Date(),
-      approvedBy: req.userId,
-    });
-    
-    await approvedContent.save({ session });
-    
     // Update submission status
-    submission.status = 'approved';
-    await submission.save({ session });
+    submission.status = status;
+    submission.processedAt = new Date();
     
+    if (status === 'rejected' && reason) {
+      submission.rejectionReason = reason;
+    }
+
+    // If approving, create approved content
+    if (status === 'approved') {
+      const { _id, userId, title, description, type, contentUrl, text, category, tribe, country, state, village } = submission;
+      const approvedContent = new ApprovedContent({
+        originalId: _id,
+        userId,
+        title,
+        description,
+        type,
+        contentUrl,
+        text,
+        category,
+        tribe,
+        country,
+        state,
+        village,
+        approvedAt: new Date()
+      });
+      
+      await approvedContent.save({ session });
+    }
+
+    await submission.save({ session });
     await session.commitTransaction();
-    res.json({ message: 'Submission approved and moved to approved content', data: approvedContent });
+    session.endSession();
+
+    res.json({ message: `Submission ${status} successfully` });
   } catch (e) {
     await session.abortTransaction();
-    console.error('Error approving submission:', e);
+    console.error('Error updating submission:', e);
     res.status(500).json({ errors: [{ msg: 'Server error' }] });
   } finally {
     session.endSession();

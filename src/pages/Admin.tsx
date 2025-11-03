@@ -191,6 +191,49 @@ const Admin = () => {
     }
   };
 
+  const updateStatus = async (id: string, status: 'approved' | 'rejected', reason?: string) => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+      if (!token) {
+        navigate('/admin/login', { replace: true });
+        return;
+      }
+
+      const response = await fetch(`/api/admin/submissions/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status, reason })
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        navigate('/admin/login', { replace: true });
+        return;
+      }
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.errors?.[0]?.msg || 'Failed to update status');
+      }
+
+      // Refresh the list
+      fetchItems(activeSection);
+      toast({
+        title: 'Success',
+        description: `Submission ${status} successfully`,
+        variant: 'default'
+      });
+    } catch (e: any) {
+      toast({
+        title: 'Error',
+        description: e.message || 'Failed to update status',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const deleteItem = async (id: string) => {
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
@@ -214,8 +257,15 @@ const Admin = () => {
   };
 
   useEffect(() => {
+    // Check if user is admin
+    const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+    if (!token) {
+      navigate('/admin/login', { replace: true });
+      return;
+    }
+    
     fetchItems(activeSection);
-  }, [activeSection]);
+  }, [activeSection, navigate]);
 
   const actOn = async (id: string, action: 'approve' | 'reject') => {
     try {
@@ -246,6 +296,171 @@ const Admin = () => {
     { id: "rejected", label: "Rejected Content", icon: XCircle },
     { id: "users", label: "User Management", icon: Users },
   ];
+
+  const renderItem = (item: any) => {
+    if ('email' in item) {
+      // User item
+      return (
+        <Card key={item._id} className="mb-4">
+          <CardHeader>
+            <CardTitle>{item.name || 'No name'}</CardTitle>
+            <CardDescription>{item.email}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                Joined: {new Date(item.createdAt || '').toLocaleDateString()}
+              </span>
+              <Button variant="destructive" size="sm" onClick={() => deleteItem(item._id)}>
+                Delete
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+    
+    // Submission item
+    const submission = item;
+    return (
+      <Card key={submission._id} className="mb-6">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle>{submission.title}</CardTitle>
+              <CardDescription className="mt-1">
+                {submission.type} • {new Date(submission.createdAt || '').toLocaleString()}
+                {submission.status === 'pending' && (
+                  <span className="ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                    Pending Review
+                  </span>
+                )}
+                {submission.status === 'approved' && (
+                  <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
+                    Approved
+                  </span>
+                )}
+                {submission.status === 'rejected' && (
+                  <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded-full">
+                    Rejected
+                  </span>
+                )}
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {submission.description && (
+              <div>
+                <h4 className="text-sm font-medium mb-1">Description</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-line">{submission.description}</p>
+              </div>
+            )}
+
+            {submission.contentUrl && (
+              <div>
+                <h4 className="text-sm font-medium mb-2">Content</h4>
+                {renderFilePreview(submission.contentUrl, submission.type)}
+              </div>
+            )}
+
+            {submission.text && (
+              <div>
+                <h4 className="text-sm font-medium mb-1">Text Content</h4>
+                <div className="p-4 bg-muted/20 rounded">
+                  <p className="whitespace-pre-line">{submission.text}</p>
+                </div>
+              </div>
+            )}
+
+            {submission.consent && (
+              <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
+                <h4 className="text-sm font-medium mb-2 text-emerald-800">Consent Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-emerald-700">Name: <span className="text-foreground">{submission.consent.name}</span></p>
+                    <p className="text-sm text-emerald-700">Status: <span className="text-foreground">{submission.consent.given ? 'Given' : 'Not Given'}</span></p>
+                    {submission.consent.relation && (
+                      <p className="text-sm text-emerald-700">
+                        Relation: <span className="text-foreground">{submission.consent.relation}</span>
+                      </p>
+                    )}
+                  </div>
+                  {submission.consent.fileUrl && (
+                    <div>
+                      <p className="text-sm font-medium text-emerald-700 mb-1">Consent File:</p>
+                      <a
+                        href={submission.consent.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-emerald-600 hover:underline flex items-center"
+                      >
+                        <FileText className="w-4 h-4 mr-1" /> View Consent Document
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 pt-2">
+              {submission.tribe && (
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                  {submission.tribe}
+                </span>
+              )}
+              {submission.category && (
+                <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                  {submission.category}
+                </span>
+              )}
+              {submission.country && (
+                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                  {submission.country}
+                </span>
+              )}
+              {submission.state && (
+                <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full">
+                  {submission.state}
+                </span>
+              )}
+              {submission.village && (
+                <span className="px-2 py-1 bg-cyan-100 text-cyan-800 text-xs rounded-full">
+                  {submission.village}
+                </span>
+              )}
+            </div>
+
+            {submission.status === 'pending' && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Button 
+                  size="sm" 
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={() => updateStatus(submission._id, 'approved')}
+                >
+                  <CheckCircle className="w-4 h-4 mr-1" /> Approve
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-red-600 border-red-300 hover:bg-red-50"
+                  onClick={() => {
+                    const reason = prompt('Please provide a reason for rejection:');
+                    if (reason !== null) {
+                      updateStatus(submission._id, 'rejected', reason);
+                    }
+                  }}
+                >
+                  <XCircle className="w-4 h-4 mr-1" /> Reject
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
