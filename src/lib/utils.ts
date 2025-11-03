@@ -14,8 +14,9 @@ export function mediaSrc(u?: string): string {
     if (u.startsWith("/")) {
       // Check if it's a local upload path
       if (u.startsWith("/uploads/")) {
-        // For local uploads, we'll handle the missing file case in the UI
-        return u;
+        // Convert local upload paths to Cloudinary format
+        const filename = u.replace(/^\/uploads\//, '');
+        return `https://res.cloudinary.com/dvg3aiqmb/raw/upload/${filename}`;
       }
       return u;
     }
@@ -25,40 +26,47 @@ export function mediaSrc(u?: string): string {
       const url = new URL(u);
       const path = url.pathname;
       
+      // For Cloudinary URLs, ensure we're using the correct resource type
+      const isPdf = /\.pdf(\?|#|$)/i.test(path);
+      const isVideo = /\.(mp4|webm|ogg|mov|avi|m3u8)(\?|#|$)/i.test(path);
+      
       // For PDFs, ensure we're using the raw/upload endpoint
-      if (/\.pdf(\?|#|$)/i.test(path)) {
-        // Check if the URL has the /uploads/ segment which might be causing 404
-        const pathParts = path.split('/');
-        const uploadsIndex = pathParts.findIndex(part => part === 'uploads');
+      if (isPdf || isVideo) {
+        // Rebuild the URL with the correct resource type
+        const cloudName = 'dvg3aiqmb';
+        const resourceType = isPdf ? 'raw' : 'video';
+        const publicId = path.split('/').pop() || '';
         
-        if (uploadsIndex > -1) {
-          // Rebuild the path without the /uploads/ segment
-          const newPath = [...pathParts.slice(0, uploadsIndex), ...pathParts.slice(uploadsIndex + 1)].join('/');
-          url.pathname = newPath;
-          u = url.toString();
+        // Construct the new URL
+        const newUrl = new URL(`https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${publicId}`);
+        
+        // Preserve query parameters
+        if (url.search) {
+          newUrl.search = url.search;
         }
         
-        // Ensure we're using the raw/upload endpoint
-        return u.replace(/\/(image|video)\/upload\//i, "/raw/upload/");
+        // Add flags to prevent auto-download
+        if (!newUrl.search) newUrl.search = '?';
+        if (!newUrl.search.includes('dl=')) {
+          newUrl.search += (newUrl.search === '?' ? '' : '&') + 'dl=0';
+        }
+        
+        return newUrl.toString();
       }
       
-      // Add parameters to prevent auto-download for Cloudinary
-      if (!url.search) {
-        url.search = '?'; 
-      } else if (!url.search.endsWith('&')) {
-        url.search += '&';
+      // For images, just ensure we have the right parameters
+      const urlObj = new URL(u);
+      if (!urlObj.search) urlObj.search = '?';
+      if (!urlObj.search.includes('dl=')) {
+        urlObj.search += (urlObj.search === '?' ? '' : '&') + 'dl=0';
       }
-      
-      // Add flags to prevent auto-download
-      url.search += 'dl=0&_i=AA';
-      
-      return url.toString();
+      return urlObj.toString();
     }
 
-    // Handle local file paths
+    // Handle local file paths (shouldn't normally happen, but just in case)
     if (!/^https?:\/\//i.test(u)) {
-      // This is a bare filename, treat as local upload
-      return `/uploads/${u.replace(/^uploads\//, '')}`;
+      // Treat as Cloudinary raw upload
+      return `https://res.cloudinary.com/dvg3aiqmb/raw/upload/${u.replace(/^uploads\//, '')}`;
     }
 
     // For other URLs, return as-is but add no-download params if it's a direct file
@@ -74,6 +82,7 @@ export function mediaSrc(u?: string): string {
     return u;
   } catch (error) {
     console.error('Error processing media URL:', error);
+    // Return the original URL if there's an error
     return u;
   }
 }
