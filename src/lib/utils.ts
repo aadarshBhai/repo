@@ -5,20 +5,64 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Normalize media URLs and handle missing files gracefully
+/**
+ * Normalize media URLs and handle missing files gracefully
+ * @param u The input URL or path
+ * @returns A properly formatted Cloudinary URL or the original URL if it's already a valid URL
+ */
 export function mediaSrc(u?: string): string {
   if (!u) return "";
   
   try {
-    // If it's already a relative path, ensure it has the correct prefix
-    if (u.startsWith("/")) {
-      // Check if it's a local upload path
-      if (u.startsWith("/uploads/")) {
-        // Convert local upload paths to Cloudinary format
-        const filename = u.replace(/^\/uploads\//, '');
-        return `https://res.cloudinary.com/dvg3aiqmb/raw/upload/${filename}`;
+    // Debug log to see what URLs we're processing
+    console.log(`Processing media URL: ${u}`);
+    
+    // If it's already a Cloudinary URL, ensure it's using the correct format
+    if (u.includes('res.cloudinary.com')) {
+      const url = new URL(u);
+      // Ensure we're using the correct Cloudinary account
+      if (url.hostname === 'res.cloudinary.com') {
+        const pathParts = url.pathname.split('/').filter(Boolean);
+        if (pathParts[0] !== 'dvg3aiqmb') {
+          // If the Cloudinary account is different, update it
+          pathParts[0] = 'dvg3aiqmb';
+          url.pathname = pathParts.join('/');
+          return url.toString();
+        }
       }
       return u;
+    }
+    
+    // Extract filename from different path formats
+    let filename = '';
+    
+    // Handle paths with uploads/ prefix (with or without leading slash)
+    if (u.includes('uploads/')) {
+      filename = u.split('uploads/').pop() || '';
+    } 
+    // Handle bare filenames
+    else if (!u.startsWith('http') && !u.startsWith('/') && u.includes('.')) {
+      filename = u;
+    }
+    
+    // If we have a valid filename, construct the Cloudinary URL
+    if (filename) {
+      // Determine resource type from file extension
+      const ext = filename.split('.').pop()?.toLowerCase() || '';
+      const isVideo = ['mp4', 'mov', 'avi', 'webm', 'm3u8'].includes(ext);
+      const isPdf = ext === 'pdf';
+      
+      const resourceType = isVideo ? 'video' : (isPdf ? 'raw' : 'image');
+      const cloudinaryUrl = `https://res.cloudinary.com/dvg3aiqmb/${resourceType}/upload/${filename}`;
+      
+      console.log(`Converted ${u} to Cloudinary URL: ${cloudinaryUrl}`);
+      return cloudinaryUrl;
+    }
+    
+    // If we can't determine the file type, try a generic approach
+    if (u.startsWith('/') || !u.includes('://')) {
+      const cleanUrl = u.replace(/^[\/]+/, '');
+      return `https://res.cloudinary.com/dvg3aiqmb/raw/upload/${cleanUrl}`;
     }
 
     // Handle Cloudinary URLs
@@ -90,5 +134,13 @@ export function mediaSrc(u?: string): string {
 // Check if a URL points to a potentially downloadable file
 export function isFileUrl(url: string): boolean {
   if (!url) return false;
-  return /\.(pdf|docx?|xlsx?|pptx?|mp4|mp3|wav|ogg|mov|avi|webm|zip|rar|7z)(\?|#|$)/i.test(url);
+  
+  // Check for common file extensions
+  const isFile = /\.(pdf|docx?|xlsx?|pptx?|mp4|mp3|wav|ogg|mov|avi|webm|zip|rar|7z|jpe?g|png|gif|webp|bmp|svg)(\?|#|$)/i.test(url);
+  
+  // Also check for Cloudinary URLs with file extensions
+  const isCloudinaryFile = url.includes('res.cloudinary.com') && 
+    /\/(image|video|raw)\/upload\/.+?\.(pdf|docx?|xlsx?|pptx?|mp4|mp3|wav|ogg|mov|avi|webm|jpe?g|png|gif|webp|bmp|svg)(\?|#|$)/i.test(url);
+  
+  return isFile || isCloudinaryFile;
 }
