@@ -1,6 +1,12 @@
 // Chat Storage Module
 const CHAT_STORAGE_KEY = 'chatHistory';
 
+// Check if chat exists and has messages
+function chatExists() {
+    const messages = localStorage.getItem(CHAT_STORAGE_KEY);
+    return messages && JSON.parse(messages).length > 0;
+}
+
 /**
  * Saves a message to localStorage
  * @param {string} sender - 'user' or 'bot'
@@ -78,7 +84,8 @@ initializeChat();
 window.chatStorage = {
     saveMessage,
     loadMessages,
-    clearChat
+    clearChat,
+    chatExists
 };
 
 // Example usage:

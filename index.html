@@ -35,51 +35,196 @@
     <script type="module" src="/src/main.tsx"></script>
 
     <!-- BotPenguin Chatbot Integration -->
-    <iframe src="https://page.botpenguin.com/69083c0a001f8cb23a75b118/690838f5cf30ddb349e703e5"></iframe>
-    <!-- Chat Storage and UI -->
-    <div id="chat-container" style="position: fixed; bottom: 20px; right: 20px; width: 300px; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; max-height: 500px;">
-      <div style="background: #f5f5f5; padding: 10px; border-bottom: 1px solid #ddd; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0;">Chat</h3>
-        <button id="end-chat-btn" style="background: #ff4d4f; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">End Chat</button>
+    <iframe src="https://page.botpenguin.com/69083c0a001f8cb23a75b118/690838f5cf30ddb349e703e5" style="display: none;"></iframe>
+    
+    <!-- Chat Toggle Button (shown when near footer) -->
+    <button id="chat-toggle" style="display: none; position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #1890ff; color: white; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 1000; opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease;">
+      <span style="font-size: 24px;">💬</span>
+    </button>
+
+    <!-- Chat Container -->
+    <div id="chat-container" style="position: fixed; bottom: 20px; right: 20px; width: 90%; max-width: 400px; height: 70vh; max-height: 600px; background: white; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; z-index: 1000; transition: all 0.3s ease; transform: translateY(20px); opacity: 0; visibility: hidden;">
+      <div style="background: #1890ff; color: white; padding: 12px 16px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Chat with us</h3>
+        <div>
+          <button id="minimize-chat" style="background: transparent; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-right: 10px;">−</button>
+          <button id="close-chat" style="background: transparent; border: none; color: white; font-size: 1.2rem; cursor: pointer;">×</button>
+        </div>
       </div>
-      <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 10px;">
+      <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; background: #f9f9f9;">
         <!-- Messages will be inserted here -->
       </div>
-      <div style="padding: 10px; border-top: 1px solid #ddd;">
-        <input type="text" id="chat-input" style="width: calc(100% - 60px); padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Type a message...">
-        <button id="send-btn" style="width: 50px; padding: 8px; margin-left: 5px;">Send</button>
+      <div style="padding: 12px; border-top: 1px solid #eee; background: white; border-radius: 0 0 12px 12px;">
+        <div style="display: flex; gap: 8px;">
+          <input 
+            type="text" 
+            id="chat-input" 
+            style="flex: 1; padding: 10px 12px; border: 1px solid #ddd; border-radius: 20px; outline: none; font-size: 0.95rem;" 
+            placeholder="Type a message..."
+            autocomplete="off"
+          >
+          <button id="send-btn" style="background: #1890ff; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div style="margin-top: 10px; text-align: center;">
+          <button id="end-chat-btn" style="background: #ff4d4f; color: white; border: none; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            End Chat
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Chat Storage Script -->
     <script src="/chatStorage.js"></script>
+    <style>
+      /* Responsive styles */
+      @media (max-width: 768px) {
+        #chat-container {
+          width: 90% !important;
+          height: 80vh !important;
+          right: 5% !important;
+          bottom: 5% !important;
+          max-height: 90vh !important;
+        }
+        
+        #chat-toggle {
+          display: block !important;
+          bottom: 20px !important;
+          right: 20px !important;
+        }
+        
+        .chat-visible {
+          transform: translateY(0) !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+      }
+      
+      @media (min-width: 769px) {
+        #chat-toggle {
+          display: block !important;
+          bottom: 30px !important;
+          right: 30px !important;
+          width: 70px !important;
+          height: 70px !important;
+        }
+        
+        #chat-container {
+          bottom: 30px !important;
+          right: 30px !important;
+        }
+      }
+      
+      /* Custom scrollbar */
+      #chat-messages::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      #chat-messages::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      
+      #chat-messages::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+      }
+      
+      #chat-messages::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+      }
+    </style>
     <script>
       // Wait for DOM to be fully loaded
       document.addEventListener('DOMContentLoaded', function() {
+        const chatContainer = document.getElementById('chat-container');
         const chatMessages = document.getElementById('chat-messages');
         const chatInput = document.getElementById('chat-input');
         const sendBtn = document.getElementById('send-btn');
         const endChatBtn = document.getElementById('end-chat-btn');
+        const chatToggle = document.getElementById('chat-toggle');
+        const closeChatBtn = document.getElementById('close-chat');
+        const minimizeChatBtn = document.getElementById('minimize-chat');
+        let isChatVisible = false;
+        
+        // Toggle chat visibility on mobile
+        function toggleChat() {
+          isChatVisible = !isChatVisible;
+          if (isChatVisible) {
+            chatContainer.classList.add('chat-visible');
+            chatInput.focus();
+          } else {
+            chatContainer.classList.remove('chat-visible');
+          }
+        }
+        
+        // Show chat
+        function showChat() {
+          isChatVisible = true;
+          chatContainer.classList.add('chat-visible');
+          chatInput.focus();
+        }
+        
+        // Event listeners for chat controls
+        chatToggle?.addEventListener('click', toggleChat);
+        closeChatBtn?.addEventListener('click', () => {
+          isChatVisible = false;
+          chatContainer.classList.remove('chat-visible');
+        });
+        minimizeChatBtn?.addEventListener('click', () => {
+          isChatVisible = false;
+          chatContainer.classList.remove('chat-visible');
+        });
 
         // Load and display existing messages
         function displayMessages() {
           const messages = window.chatStorage.loadMessages();
           chatMessages.innerHTML = ''; // Clear current messages
           
+          if (messages.length === 0) {
+            // Show welcome message for new chat
+            chatMessages.innerHTML = `
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px; color: #666;">
+                <div style="font-size: 1.5rem; margin-bottom: 10px; color: #1890ff;">👋 Hello!</div>
+                <p style="margin: 0 0 20px 0; max-width: 300px;">I'm your virtual assistant. How can I help you today?</p>
+              </div>
+            `;
+            return;
+          }
+          
           messages.forEach(msg => {
             const messageDiv = document.createElement('div');
-            messageDiv.style.margin = '5px 0';
-            messageDiv.style.padding = '8px';
-            messageDiv.style.borderRadius = '4px';
-            messageDiv.style.backgroundColor = msg.sender === 'user' ? '#e6f7ff' : '#f5f5f5';
-            messageDiv.style.alignSelf = msg.sender === 'user' ? 'flex-end' : 'flex-start';
-            messageDiv.style.maxWidth = '80%';
+            messageDiv.style.margin = '8px 0';
+            messageDiv.style.padding = '10px 14px';
+            messageDiv.style.borderRadius = '12px';
+            messageDiv.style.maxWidth = '85%';
+            messageDiv.style.wordWrap = 'break-word';
+            
+            // Different styles for user and bot messages
+            if (msg.sender === 'user') {
+              messageDiv.style.marginLeft = 'auto';
+              messageDiv.style.backgroundColor = '#1890ff';
+              messageDiv.style.color = 'white';
+              messageDiv.style.borderBottomRightRadius = '4px';
+            } else {
+              messageDiv.style.marginRight = 'auto';
+              messageDiv.style.backgroundColor = '#f0f0f0';
+              messageDiv.style.color = '#333';
+              messageDiv.style.borderBottomLeftRadius = '4px';
+            }
             
             messageDiv.innerHTML = `
-              <div style="font-weight: bold;">${msg.sender === 'user' ? 'You' : 'Bot'}</div>
-              <div>${msg.text}</div>
-              <div style="font-size: 0.8em; color: #666; text-align: right;">
-                ${new Date(msg.timestamp).toLocaleTimeString()}
+              <div style="font-weight: 500; margin-bottom: 4px;">${msg.sender === 'user' ? 'You' : 'Assistant'}</div>
+              <div style="white-space: pre-wrap;">${msg.text.replace(/\n/g, '<br>')}</div>
+              <div style="font-size: 0.7rem; opacity: 0.8; text-align: right; margin-top: 4px;">
+                ${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
               </div>
             `;
             
@@ -99,11 +244,40 @@
             chatInput.value = '';
             displayMessages();
             
-            // Simulate bot response (replace with actual bot logic)
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.id = 'typing-indicator';
+            typingIndicator.style.display = 'flex';
+            typingIndicator.style.gap = '5px';
+            typingIndicator.style.margin = '5px 0';
+            typingIndicator.style.padding = '8px';
+            typingIndicator.style.backgroundColor = '#f5f5f5';
+            typingIndicator.style.borderRadius = '4px';
+            typingIndicator.style.alignSelf = 'flex-start';
+            typingIndicator.innerHTML = `
+              <div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: bounce 1s infinite;"></div>
+              <div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: bounce 1s infinite 0.2s;"></div>
+              <div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: bounce 1s infinite 0.4s;"></div>
+              <style>
+                @keyframes bounce {
+                  0%, 100% { transform: translateY(0); }
+                  50% { transform: translateY(-5px); }
+                }
+              </style>
+            `;
+            chatMessages.appendChild(typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Simulate bot response (replace with actual bot API call)
             setTimeout(() => {
+              // Remove typing indicator
+              const indicator = document.getElementById('typing-indicator');
+              if (indicator) indicator.remove();
+              
+              // Save and display bot response
               window.chatStorage.saveMessage('bot', 'Thanks for your message! This is an automated response.');
               displayMessages();
-            }, 1000);
+            }, 1500);
           }
         }
 
@@ -116,12 +290,71 @@
         endChatBtn.addEventListener('click', () => {
           if (confirm('Are you sure you want to end this chat? All history will be cleared.')) {
             window.chatStorage.clearChat();
-            chatMessages.innerHTML = '<div style="padding: 10px; color: #666;">Chat cleared. Start a new conversation!</div>';
+            chatMessages.innerHTML = `
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px; color: #666;">
+                <div style="font-size: 1.2rem; margin-bottom: 10px;">Chat Ended</div>
+                <p style="margin: 0 0 20px 0; max-width: 300px;">Thank you for chatting with us. Start a new conversation anytime!</p>
+                <button id="start-new-chat" style="background: #1890ff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                  Start New Chat
+                </button>
+              </div>
+            `;
+            
+            // Add event listener to the new chat button
+            document.getElementById('start-new-chat')?.addEventListener('click', () => {
+              window.chatStorage.clearChat();
+              displayMessages();
+            });
+            
+            // Hide chat on mobile after ending
+            if (window.innerWidth < 769) {
+              toggleChat();
+            }
           }
         });
 
-        // Initial display of messages
+        // Initial display of messages and set initial state
         displayMessages();
+        
+        // Show chat toggle button when near footer
+        function handleScroll() {
+          const footer = document.querySelector('footer') || document.body;
+          const footerPosition = footer.getBoundingClientRect().top;
+          const screenPosition = window.innerHeight * 0.8; // Show when 80% down the page
+          const chatToggle = document.getElementById('chat-toggle');
+          
+          if (footerPosition < screenPosition) {
+            chatToggle.style.opacity = '1';
+            chatToggle.style.transform = 'translateY(0)';
+          } else {
+            chatToggle.style.opacity = '0';
+            chatToggle.style.transform = 'translateY(20px)';
+          }
+        }
+
+        // Initial check on load
+        handleScroll();
+        
+        // Listen for scroll events
+        window.addEventListener('scroll', handleScroll);
+        
+        // Handle window resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            handleScroll();
+          }, 250);
+        });
+        
+        // Show chat when clicking the toggle button
+        document.getElementById('chat-toggle')?.addEventListener('click', () => {
+          showChat();
+          // Hide the toggle button after clicking
+          const chatToggle = document.getElementById('chat-toggle');
+          chatToggle.style.opacity = '0';
+          chatToggle.style.transform = 'translateY(20px)';
+        });
       });
     </script>
   </body>
