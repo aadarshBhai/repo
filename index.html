@@ -34,27 +34,38 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Chat Toggle Button (Fixed on left side) -->
-    <div id="chat-toggle" style="position: fixed; top: 50%; left: 0; transform: rotate(-90deg) translateX(-50%) translateY(-50%); transform-origin: left center; background: #1890ff; color: white; padding: 10px 20px; border-radius: 0 0 8px 8px; cursor: pointer; z-index: 9999; box-shadow: 2px 2px 10px rgba(0,0,0,0.15); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(90deg);">
+    <!-- Modern Chat Toggle Button (Fixed on right side) -->
+    <div id="chat-toggle" style="position: fixed; top: 50%; right: 0; transform: translateY(-50%); background: linear-gradient(135deg, #1890ff, #096dd9); color: white; padding: 16px 8px; border-radius: 8px 0 0 8px; cursor: pointer; z-index: 9999; box-shadow: -2px 2px 12px rgba(0,0,0,0.15); transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 6px; writing-mode: vertical-rl; text-orientation: mixed; height: 140px; justify-content: center;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(-90deg);">
         <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.6056 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47089C20.0052 6.94699 20.885 8.91568 21 11V11.5Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <span style="font-weight: 500; font-size: 0.9rem;">Chat with us</span>
+      <span style="font-weight: 600; font-size: 0.85rem; letter-spacing: 1px; transform: rotate(180deg);">CHAT WITH US</span>
+      <div style="width: 20px; height: 20px; background: #ff4d4f; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: 10px; right: 5px; font-size: 10px; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">1</div>
     </div>
 
-    <!-- Chat Container -->
-    <div id="chat-container" style="position: fixed; top: 0; bottom: 0; left: 0; width: 400px; max-width: 100%; height: 100vh; background: white; border-right: 1px solid #e0e0e0; box-shadow: 2px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; z-index: 1000; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-100%);">
-      <div style="background: #1890ff; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
-        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Chat with us</h3>
+    <!-- Modern Chat Container -->
+    <div id="chat-container" style="position: fixed; top: 0; right: 0; bottom: 0; width: 380px; max-width: 100%; height: 100vh; background: white; border-left: 1px solid rgba(0,0,0,0.05); box-shadow: -5px 0 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; z-index: 1000; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform: translateX(100%); border-radius: 12px 0 0 12px; overflow: hidden;">
+      <div style="background: linear-gradient(135deg, #1890ff, #096dd9); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.6056 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47089C20.0052 6.94699 20.885 8.91568 21 11V11.5Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; line-height: 1.3;">Chat Support</h3>
+            <p style="margin: 0; font-size: 0.8rem; opacity: 0.9; font-weight: 400;">We're here to help you!</p>
+          </div>
+        </div>
         <div>
-          <button id="minimize-chat" style="background: transparent; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-right: 10px;">−</button>
-          <button id="close-chat" style="background: transparent; border: none; color: white; font-size: 1.2rem; cursor: pointer;">×</button>
+          <button id="minimize-chat" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; margin-right: 8px; transition: all 0.2s ease;">−</button>
+          <button id="close-chat" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;">×</button>
         </div>
       </div>
-      <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 16px; background: #f8f9fa; scrollbar-width: thin; scrollbar-color: #c1c1c1 #f1f1f1;">
+      <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 20px; background: #f8fafc; scrollbar-width: thin; scrollbar-color: #d1d5db #f3f4f6; background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 20px 20px;">
         <!-- Messages will be inserted here -->
       </div>
-      <div style="padding: 12px 16px; background: white; border-top: 1px solid #f0f0f0;">
+      <div style="padding: 16px; background: white; border-top: 1px solid #f0f0f0; box-shadow: 0 -2px 10px rgba(0,0,0,0.03);">
         <div style="display: flex; gap: 8px;">
           <input 
             type="text" 
@@ -87,17 +98,38 @@
       /* Responsive styles */
       @media (max-width: 768px) {
         #chat-container {
-          width: 90% !important;
-          height: 80vh !important;
-          right: 5% !important;
-          bottom: 5% !important;
-          max-height: 90vh !important;
+          width: 100% !important;
+          height: 100vh !important;
+          right: 0 !important;
+          left: auto !important;
+          transform: translateX(100%) !important;
+          border-radius: 0 !important;
         }
         
         #chat-toggle {
-          display: block !important;
-          bottom: 20px !important;
+          width: 50px !important;
+          height: 50px !important;
+          border-radius: 50% !important;
+          padding: 0 !important;
           right: 20px !important;
+          bottom: 30px !important;
+          top: auto !important;
+          transform: none !important;
+          box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4) !important;
+        }
+        
+        #chat-toggle span {
+          display: none !important;
+        }
+        
+        #chat-toggle svg {
+          transform: rotate(0) !important;
+          margin: 0 !important;
+        }
+        
+        #chat-toggle .unread-badge {
+          top: -5px !important;
+          right: -5px !important;
         }
         
         .chat-visible {
@@ -326,26 +358,31 @@
           isChatOpen = !isChatOpen;
           if (isChatOpen) {
             chatContainer.style.transform = 'translateX(0)';
-            chatToggle.style.left = '400px';
+            chatToggle.style.right = '380px';
+            chatToggle.style.boxShadow = 'none';
             document.getElementById('chat-input')?.focus();
           } else {
-            chatContainer.style.transform = 'translateX(-100%)';
-            chatToggle.style.left = '0';
+            chatContainer.style.transform = 'translateX(100%)';
+            chatToggle.style.right = '0';
+            chatToggle.style.boxShadow = '-2px 2px 12px rgba(0,0,0,0.15)';
           }
         }
 
         function showChat() {
           const chatContainer = document.getElementById('chat-container');
-          chatContainer.style.height = '400px';
+          chatContainer.style.transform = 'translateX(0)';
+          chatToggle.style.right = '380px';
+          chatToggle.style.boxShadow = 'none';
           document.getElementById('chat-input')?.focus();
+          isChatOpen = true;
         }
 
         function hideChat() {
           const chatContainer = document.getElementById('chat-container');
-          chatContainer.style.height = '0';
-          const chatToggle = document.getElementById('chat-toggle');
-          chatToggle.style.opacity = '1';
-          chatToggle.style.pointerEvents = 'auto';
+          chatContainer.style.transform = 'translateX(100%)';
+          chatToggle.style.right = '0';
+          chatToggle.style.boxShadow = '-2px 2px 12px rgba(0,0,0,0.15)';
+          isChatOpen = false;
         }
 
         chatToggle?.addEventListener('click', toggleChat);
