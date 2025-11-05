@@ -34,18 +34,16 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Chat Toggle Button (Fixed at bottom) -->
-    <div id="chat-toggle" style="position: fixed; bottom: 0; left: 0; right: 0; background: #1890ff; color: white; text-align: center; padding: 14px 0; cursor: pointer; z-index: 9999; box-shadow: 0 -2px 10px rgba(0,0,0,0.15); transition: all 0.3s ease; display: block !important; opacity: 1 !important; transform: none !important;">
-      <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));">
-          <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.6056 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47089C20.0052 6.94699 20.885 8.91568 21 11V11.5Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span style="font-weight: 500; font-size: 1rem;">Need help? Chat with us</span>
-      </div>
+    <!-- Chat Toggle Button (Fixed on left side) -->
+    <div id="chat-toggle" style="position: fixed; top: 50%; left: 0; transform: rotate(-90deg) translateX(-50%) translateY(-50%); transform-origin: left center; background: #1890ff; color: white; padding: 10px 20px; border-radius: 0 0 8px 8px; cursor: pointer; z-index: 9999; box-shadow: 2px 2px 10px rgba(0,0,0,0.15); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(90deg);">
+        <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.6056 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47089C20.0052 6.94699 20.885 8.91568 21 11V11.5Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span style="font-weight: 500; font-size: 0.9rem;">Chat with us</span>
     </div>
 
     <!-- Chat Container -->
-    <div id="chat-container" style="position: fixed; bottom: 0; left: 0; right: 0; height: 0; background: white; border-top: 1px solid #e0e0e0; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; z-index: 1000; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
+    <div id="chat-container" style="position: fixed; top: 0; bottom: 0; left: 0; width: 400px; max-width: 100%; height: 100vh; background: white; border-right: 1px solid #e0e0e0; box-shadow: 2px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; z-index: 1000; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-100%);">
       <div style="background: #1890ff; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
         <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Chat with us</h3>
         <div>
@@ -327,14 +325,12 @@
         function toggleChat() {
           isChatOpen = !isChatOpen;
           if (isChatOpen) {
-            chatContainer.style.height = '400px';
-            chatContainer.style.visibility = 'visible';
-            chatContainer.style.opacity = '1';
+            chatContainer.style.transform = 'translateX(0)';
+            chatToggle.style.left = '400px';
             document.getElementById('chat-input')?.focus();
           } else {
-            chatContainer.style.height = '0';
-            chatContainer.style.opacity = '0';
-            chatContainer.style.visibility = 'hidden';
+            chatContainer.style.transform = 'translateX(-100%)';
+            chatToggle.style.left = '0';
           }
         }
 
