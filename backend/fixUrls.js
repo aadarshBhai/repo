@@ -1,7 +1,15 @@
-// fixUrls.js
-const { MongoClient } = require('mongodb');
-const { v2: cloudinary } = require('cloudinary');
-require('dotenv').config();
+// fixUrls.mjs
+import { MongoClient } from 'mongodb';
+import { v2 as cloudinary } from 'cloudinary';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import { dirname } from 'path';
+
+// Configure environment variables
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 // Configure Cloudinary
 cloudinary.config({
@@ -97,7 +105,7 @@ async function main() {
 
       // Update the document if needed
       if (needsUpdate) {
-        await submissions.updateOne({ _id: doc._id }, update);
+        await submissions.updateOne({ _id: doc._id }, { $set: update.$set || update });
         console.log(`Updated submission: ${doc._id}`);
         count++;
       }

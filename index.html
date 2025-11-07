@@ -93,8 +93,432 @@
     </div>
 
     <!-- Chat Storage Script -->
-    <script src="/chatStorage.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // State management
+        const chatState = {
+          isVisible: false,
+          isMinimized: false,
+          messages: [],
+          unreadCount: 0,
+          isTyping: false
+        };
+
+        // Get all chat elements
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatContainer = document.getElementById('chat-container');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatMessages = document.getElementById('chat-messages');
+        const closeChatBtn = document.getElementById('close-chat');
+        const minimizeChatBtn = document.getElementById('minimize-chat');
+        const endChatBtn = document.getElementById('end-chat-btn');
+        const unreadBadge = chatToggle?.querySelector('div');
+
+        // Toggle chat visibility
+        function toggleChat() {
+          chatState.isVisible = !chatState.isVisible;
+          updateChatUI();
+          if (chatState.isVisible) {
+            if (chatInput) chatInput.focus();
+            // Reset unread count when opening chat
+            if (unreadBadge) {
+              chatState.unreadCount = 0;
+              unreadBadge.style.display = 'none';
+            }
+          }
+        }
+
+        // Update chat UI based on state
+        function updateChatUI() {
+          if (chatState.isVisible) {
+            chatContainer.style.transform = 'translateY(0)';
+            chatContainer.style.opacity = '1';
+            chatContainer.style.pointerEvents = 'auto';
+          } else {
+            chatContainer.style.transform = 'translateY(20px)';
+            chatContainer.style.opacity = '0';
+            chatContainer.style.pointerEvents = 'none';
+          }
+          
+          if (chatState.isMinimized) {
+            chatContainer.style.height = '60px';
+            chatContainer.querySelector('#chat-messages').style.display = 'none';
+            chatContainer.querySelector('div:last-child').style.display = 'none';
+          } else {
+            chatContainer.style.height = '600px';
+            chatContainer.querySelector('#chat-messages').style.display = 'block';
+            chatContainer.querySelector('div:last-child').style.display = 'block';
+            scrollToBottom();
+          }
+        }
+
+        // Close chat
+        function closeChat() {
+          chatState.isVisible = false;
+          updateChatUI();
+        }
+
+        // Toggle minimize
+        function toggleMinimize() {
+          chatState.isMinimized = !chatState.isMinimized;
+          updateChatUI();
+        }
+
+        // Add a new message to the chat
+        function addMessage(sender, message, isSystem = false) {
+          const messageElement = document.createElement('div');
+          messageElement.className = `message ${sender === 'user' ? 'user-message' : 'system-message'}`;
+          
+          const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          
+          messageElement.innerHTML = `
+            <div class="message-content">${message}</div>
+            <div class="message-time">${timeString}</div>
+          `;
+          
+          chatMessages.appendChild(messageElement);
+          scrollToBottom();
+          
+          // Add to message history
+          chatState.messages.push({ sender, message, time: timeString });
+          
+          // Update unread count if chat is closed or minimized
+          if ((!chatState.isVisible || chatState.isMinimized) && sender === 'system') {
+            chatState.unreadCount++;
+            if (unreadBadge) {
+              unreadBadge.textContent = chatState.unreadCount > 9 ? '9+' : chatState.unreadCount;
+              unreadBadge.style.display = 'flex';
+            }
+          }
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+          if (chatState.isTyping) return;
+          
+          chatState.isTyping = true;
+          const typingElement = document.createElement('div');
+          typingElement.id = 'typing-indicator';
+          typingElement.className = 'typing-indicator';
+          typingElement.innerHTML = `
+            <div></div>
+            <div></div>
+            <div></div>
+          `;
+          chatMessages.appendChild(typingElement);
+          scrollToBottom();
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+          chatState.isTyping = false;
+          const typingElement = document.getElementById('typing-indicator');
+          if (typingElement) {
+            typingElement.remove();
+          }
+        }
+
+        // Generate bot response
+        function generateBotResponse(userMessage) {
+          const responses = [
+            "I understand your concern. Let me help you with that.",
+            "Thanks for reaching out! How can I assist you today?",
+            "I'll look into this and get back to you shortly.",
+            "That's a great question! Let me find the best solution for you.",
+            "I'm here to help. Could you provide more details?"
+          ];
+          
+          // Simple response logic - can be enhanced
+          if (userMessage.toLowerCase().includes('help')) {
+            return "I'm here to help! What do you need assistance with?";
+          } else if (userMessage.toLowerCase().includes('thank')) {
+            return "You're welcome! Is there anything else I can help you with?";
+          } else if (userMessage.toLowerCase().includes('hello') || userMessage.toLowerCase().includes('hi')) {
+            return "Hello! How can I assist you today?";
+          }
+          
+          return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Send message
+        function sendMessage() {
+          const message = chatInput.value.trim();
+          if (!message || chatState.isTyping) return;
+          
+          // Add user message
+          addMessage('user', message);
+          chatInput.value = '';
+          
+          // Show typing indicator
+          showTypingIndicator();
+          
+          // Simulate bot response after a short delay
+          setTimeout(() => {
+            hideTypingIndicator();
+            const botResponse = generateBotResponse(message);
+            addMessage('system', botResponse, true);
+          }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds
+        }
+
+        // Scroll chat to bottom
+        function scrollToBottom() {
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Initialize chat
+        function initChat() {
+          // Clear any existing event listeners to prevent duplicates
+          const newChatToggle = chatToggle.cloneNode(true);
+          chatToggle.parentNode.replaceChild(newChatToggle, chatToggle);
+          
+          const newCloseBtn = closeChatBtn.cloneNode(true);
+          closeChatBtn.parentNode.replaceChild(newCloseBtn, closeChatBtn);
+          
+          // Add welcome message if no messages exist
+          if (chatState.messages.length === 0) {
+            addMessage('system', 'Hello! How can I help you today?', true);
+          }
+          
+          // Set up event listeners with new elements
+          if (newChatToggle) newChatToggle.addEventListener('click', toggleChat);
+          if (newCloseBtn) newCloseBtn.addEventListener('click', closeChat);
+          if (minimizeChatBtn) {
+            const newMinBtn = minimizeChatBtn.cloneNode(true);
+            minimizeChatBtn.parentNode.replaceChild(newMinBtn, minimizeChatBtn);
+            newMinBtn.addEventListener('click', toggleMinimize);
+          }
+          
+          if (sendBtn) {
+            const newSendBtn = sendBtn.cloneNode(true);
+            sendBtn.parentNode.replaceChild(newSendBtn, sendBtn);
+            newSendBtn.addEventListener('click', sendMessage);
+          }
+          
+          if (endChatBtn) {
+            const newEndBtn = endChatBtn.cloneNode(true);
+            endChatBtn.parentNode.replaceChild(newEndBtn, endChatBtn);
+            newEndBtn.addEventListener('click', closeChat);
+          }
+          
+          if (chatInput) {
+            const newChatInput = chatInput.cloneNode(true);
+            chatInput.parentNode.replaceChild(newChatInput, chatInput);
+            
+            newChatInput.addEventListener('keypress', (e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            });
+            
+            // Focus the new input if chat is visible
+            if (chatState.isVisible) {
+              setTimeout(() => newChatInput.focus(), 100);
+            }
+          }
+          
+          // Initial UI update
+          updateChatUI();
+        }
+
+        // Start the chat
+      try {
+        initChat();
+      } catch (error) {
+        console.error('Error initializing chat:', error);
+        // Attempt to reinitialize after a short delay if there's an error
+        setTimeout(initChat, 500);
+      }
+      });
+    </script>
     <style>
+      /* Chat Styles */
+      .message {
+        margin-bottom: 12px;
+        padding: 10px 15px;
+        border-radius: 18px;
+        max-width: 80%;
+        position: relative;
+        line-height: 1.4;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .user-message {
+        background: #1890ff;
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 4px;
+      }
+
+      .system-message {
+        background: #f0f2f5;
+        color: #1f1f1f;
+        margin-right: auto;
+        border-bottom-left-radius: 4px;
+      }
+
+      .message-content {
+        word-wrap: break-word;
+      }
+
+      .message-time {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        margin-top: 4px;
+        text-align: right;
+      }
+
+      .typing-indicator {
+        display: flex;
+        padding: 10px 15px;
+        margin-bottom: 12px;
+        background: #f0f2f5;
+        border-radius: 18px;
+        width: fit-content;
+        max-width: 80%;
+        border-bottom-left-radius: 4px;
+      }
+      
+      .typing-indicator div {
+        width: 8px;
+        height: 8px;
+        margin: 0 2px;
+        background-color: #8e8e93;
+        border-radius: 50%;
+        display: inline-block;
+        animation: typing 1.4s infinite ease-in-out;
+      }
+      
+      .typing-indicator div:nth-child(1) { animation-delay: 0s; }
+      .typing-indicator div:nth-child(2) { animation-delay: 0.2s; }
+      .typing-indicator div:nth-child(3) { animation-delay: 0.4s; }
+      
+      @keyframes typing {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-5px); }
+      }
+      
+      .message {
+        margin-bottom: 12px;
+        padding: 10px 15px;
+        border-radius: 18px;
+        max-width: 80%;
+        position: relative;
+        line-height: 1.4;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .user-message {
+        background: #1890ff;
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 4px;
+      }
+
+      .system-message {
+        background: #f0f2f5;
+        color: #1f1f1f;
+        margin-right: auto;
+        border-bottom-left-radius: 4px;
+      }
+
+      .message-content {
+        word-wrap: break-word;
+      }
+
+      .message-time {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        margin-top: 4px;
+        text-align: right;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .typing-indicator {
+        display: flex;
+        padding: 10px 15px;
+        margin-bottom: 12px;
+        background: #f0f2f5;
+        border-radius: 18px;
+        width: fit-content;
+        max-width: 80%;
+        border-bottom-left-radius: 4px;
+      }
+      
+      .typing-indicator div {
+        width: 8px;
+        height: 8px;
+        margin: 0 2px;
+        background-color: #8e8e93;
+        border-radius: 50%;
+        display: inline-block;
+        animation: typing 1.4s infinite ease-in-out;
+      }
+      
+      .typing-indicator div:nth-child(1) { animation-delay: 0s; }
+      .typing-indicator div:nth-child(2) { animation-delay: 0.2s; }
+      .typing-indicator div:nth-child(3) { animation-delay: 0.4s; }
+      
+      @keyframes typing {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-5px); }
+      }
+      .message {
+        margin-bottom: 12px;
+        padding: 10px 15px;
+        border-radius: 18px;
+        max-width: 80%;
+        position: relative;
+        line-height: 1.4;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .user-message {
+        background: #1890ff;
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 4px;
+      }
+
+      .system-message {
+        background: #f0f2f5;
+        color: #1f1f1f;
+        margin-right: auto;
+        border-bottom-left-radius: 4px;
+      }
+
+      .message-content {
+        word-wrap: break-word;
+      }
+
+      .message-time {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        margin-top: 4px;
+        text-align: right;
+      }
+
+      /* Chat container animations */
+      #chat-container {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Unread badge animation */
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+      }
+
+      #chat-toggle div {
+        animation: pulse 2s infinite;
+        display: none;
+      }
+
       /* Responsive styles */
       @media (max-width: 768px) {
         #chat-container {
@@ -270,50 +694,75 @@
           chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Send message handler
-        function sendMessage() {
-          const message = chatInput.value.trim();
-          if (message) {
-            // Save user message
-            window.chatStorage.saveMessage('user', message);
-            chatInput.value = '';
-            displayMessages();
-            
-            // Show typing indicator
-            const typingIndicator = document.createElement('div');
-            typingIndicator.id = 'typing-indicator';
-            typingIndicator.style.display = 'flex';
-            typingIndicator.style.gap = '5px';
-            typingIndicator.style.margin = '5px 0';
-            typingIndicator.style.padding = '8px';
-            typingIndicator.style.backgroundColor = '#f5f5f5';
-            typingIndicator.style.borderRadius = '4px';
-            typingIndicator.style.alignSelf = 'flex-start';
-            typingIndicator.innerHTML = `
-              <div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: bounce 1s infinite;"></div>
-              <div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: bounce 1s infinite 0.2s;"></div>
-              <div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: bounce 1s infinite 0.4s;"></div>
-              <style>
-                @keyframes bounce {
-                  0%, 100% { transform: translateY(0); }
-                  50% { transform: translateY(-5px); }
-                }
-              </style>
-            `;
-            chatMessages.appendChild(typingIndicator);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            // Simulate bot response (replace with actual bot API call)
-            setTimeout(() => {
-              // Remove typing indicator
-              const indicator = document.getElementById('typing-indicator');
-              if (indicator) indicator.remove();
-              
-              // Save and display bot response
-              window.chatStorage.saveMessage('bot', 'Thanks for your message! This is an automated response.');
-              displayMessages();
-            }, 1500);
+        // Add a new message to the chat
+        function addMessage(sender, message, isSystem = false) {
+          const messageObj = {
+            id: Date.now(),
+            sender,
+            message,
+            timestamp: new Date().toISOString(),
+            isSystem
+          };
+          
+          chatState.messages.push(messageObj);
+          saveMessages();
+          displayMessages();
+          
+          // Show unread badge if chat is closed or minimized
+          if (!chatState.isVisible || chatState.isMinimized) {
+            chatState.unreadCount++;
+            if (unreadBadge) {
+              unreadBadge.textContent = chatState.unreadCount > 9 ? '9+' : chatState.unreadCount;
+              unreadBadge.style.display = 'flex';
+            }
           }
+          
+          scrollToBottom();
+        }
+
+        // Send a new message
+        function sendMessage() {
+          if (!chatInput) return;
+          
+          const message = chatInput.value.trim();
+          if (!message) return;
+          
+          // Add user message
+          addMessage('user', message);
+          
+          // Clear input
+          chatInput.value = '';
+          
+          // Show typing indicator
+          const typingIndicator = document.createElement('div');
+          typingIndicator.id = 'typing-indicator';
+          typingIndicator.className = 'typing-indicator';
+          typingIndicator.innerHTML = '<div></div><div></div><div></div>';
+          if (chatMessages) {
+            chatMessages.appendChild(typingIndicator);
+            scrollToBottom();
+          }
+          
+          // Simulate bot response after a short delay
+          setTimeout(() => {
+            // Remove typing indicator
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+              indicator.remove();
+            }
+            
+            // Add bot response
+            const responses = [
+              "I understand your concern. Let me help you with that.",
+              "Thanks for reaching out! How can I assist you today?",
+              "I'll look into this and get back to you shortly.",
+              "That's a great question! Let me find the best solution for you.",
+              "I'm here to help. Could you provide more details?"
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            addMessage('system', randomResponse, true);
+          }, 1500);
         }
 
         // Event listeners
