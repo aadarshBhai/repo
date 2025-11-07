@@ -117,8 +117,19 @@
 
         // Toggle chat visibility
         function toggleChat() {
-          chatState.isVisible = !chatState.isVisible;
-          updateChatUI();
+          // Force show the chat container if it's hidden
+          if (chatContainer.style.opacity === '0' || chatContainer.style.display === 'none') {
+            chatState.isVisible = true;
+            chatContainer.style.display = 'flex';
+            chatContainer.style.opacity = '1';
+            chatContainer.style.transform = 'translateY(0)';
+            chatContainer.style.pointerEvents = 'auto';
+            if (chatInput) chatInput.focus();
+          } else {
+            chatState.isVisible = !chatState.isVisible;
+            updateChatUI();
+          }
+          
           if (chatState.isVisible) {
             if (chatInput) chatInput.focus();
             // Reset unread count when opening chat
@@ -132,13 +143,18 @@
         // Update chat UI based on state
         function updateChatUI() {
           if (chatState.isVisible) {
+            chatContainer.style.display = 'flex';
             chatContainer.style.transform = 'translateY(0)';
             chatContainer.style.opacity = '1';
             chatContainer.style.pointerEvents = 'auto';
+            // Ensure the chat is above other elements
+            chatContainer.style.zIndex = '1000';
           } else {
             chatContainer.style.transform = 'translateY(20px)';
             chatContainer.style.opacity = '0';
             chatContainer.style.pointerEvents = 'none';
+            // Keep the element in the document flow but hidden
+            chatContainer.style.display = 'none';
           }
           
           if (chatState.isMinimized) {
@@ -266,6 +282,17 @@
           chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
+        // Function to ensure chat is properly displayed
+        function ensureChatVisible() {
+          chatState.isVisible = true;
+          chatContainer.style.display = 'flex';
+          chatContainer.style.opacity = '1';
+          chatContainer.style.transform = 'translateY(0)';
+          chatContainer.style.pointerEvents = 'auto';
+          chatContainer.style.zIndex = '1000';
+          if (chatInput) chatInput.focus();
+        }
+
         // Initialize chat
         function initChat() {
           // Clear any existing event listeners to prevent duplicates
@@ -318,8 +345,14 @@
             }
           }
           
-          // Initial UI update
-          updateChatUI();
+          // Initial UI update and ensure chat is visible
+          ensureChatVisible();
+          
+          // Add a small delay to ensure everything is properly initialized
+          setTimeout(() => {
+            ensureChatVisible();
+            if (chatInput) chatInput.focus();
+          }, 100);
         }
 
         // Start the chat
