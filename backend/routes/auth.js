@@ -255,6 +255,34 @@ router.post(
   }
 );
 
+// Refresh JWT token
+router.post('/refresh-token', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ errors: [{ msg: 'No token provided' }] });
+  }
+
+  try {
+    // Verify the existing token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
+    
+    // Get the user
+    const user = await User.findById(decoded.user.id);
+    if (!user) {
+      return res.status(401).json({ errors: [{ msg: 'User not found' }] });
+    }
+
+    // Create a new token
+    const payload = { user: { id: user.id } };
+    const newToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+    return res.json({ token: newToken });
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    return res.status(401).json({ errors: [{ msg: 'Invalid token' }] });
+  }
+});
+
 export default router;
 
 // Get current user's profile

@@ -6,12 +6,15 @@ import { useAuth } from "@/context/AuthContext";
 const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, logout } = useAuth();
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { isAuthenticated, logout, user } = useAuth();
+  
+  // Debug log
+  console.log('Navigation - Auth State:', { isAuthenticated, user });
 
+  // Add a debug effect to verify the auth state
   useEffect(() => {
-    setLoggedIn(isAuthenticated);
-  }, [isAuthenticated, location.pathname]);
+    console.log('Auth state changed:', { isAuthenticated, user });
+  }, [isAuthenticated, user]);
 
   
 
@@ -24,8 +27,9 @@ const Navigation = () => {
 
   const handleLogout = () => {
     logout();
-    setLoggedIn(false);
     navigate('/');
+    // Force a full page reload to ensure all state is cleared
+    window.location.reload();
   };
 
   return (
@@ -53,7 +57,7 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
-            {loggedIn && (
+            {isAuthenticated && (
               <Link
                 to="/profile"
                 className={cn(
@@ -66,7 +70,7 @@ const Navigation = () => {
                 Profile
               </Link>
             )}
-            {!loggedIn ? (
+            {!isAuthenticated ? (
               <Link
                 to="/signup"
                 className={cn(
@@ -98,7 +102,7 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              {loggedIn && (
+              {isAuthenticated && (
                 <Link
                   to="/profile"
                   className={cn(
@@ -111,7 +115,7 @@ const Navigation = () => {
                   Profile
                 </Link>
               )}
-              {!loggedIn ? (
+              {!isAuthenticated ? (
                 <Link
                   to="/signup"
                   className={cn(

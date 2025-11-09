@@ -6,10 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
+import { Eye, EyeOff } from "lucide-react";
+import { authFetch } from "@/lib/api";
 
 const Login = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectTo = searchParams.get('redirect') || '/profile';
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -27,17 +31,21 @@ const Login = () => {
 
     try {
       setLoading(true);
-      const res = await fetch('/api/auth/login', {
+      const res = await authFetch('/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
+      
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.errors?.[0]?.msg || 'Login failed');
+      
+      if (!res.ok) {
+        throw new Error(data?.errors?.[0]?.msg || 'Login failed');
+      }
+      
       if (data && data.token) {
         login(data.token);
+        // The login function will handle the redirect to the profile page
       }
-      navigate("/explore");
     } catch (err: any) {
       alert(err.message || 'Login failed');
     } finally {
@@ -91,19 +99,23 @@ const Login = () => {
               <div className="relative">
                 <Input 
                   id="password" 
-                  type={showPassword ? 'text' : 'password'} 
-                  placeholder="••••••••"
+                  type={showPassword ? "text" : "password"} 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  className="pr-10"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((s) => !s)}
-                  className="absolute inset-y-0 right-2 my-auto text-sm text-primary underline"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>

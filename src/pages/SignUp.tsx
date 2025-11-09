@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
+import { authFetch } from "@/lib/api";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -29,16 +30,45 @@ const SignUp = () => {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setPasswordError(null);
+    
+    const err = validatePassword(password);
+    if (err) {
+      setPasswordError(err);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const err = validatePassword(password);
-      if (err) {
-        setPasswordError(err);
-        return;
+      // Call the actual signup API using authFetch
+      const response = await authFetch('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.errors?.[0]?.msg || 'Registration failed');
       }
-      // Simulate successful signup. Replace with real API as needed.
-      const fakeToken = `token_${Date.now()}`;
-      login(fakeToken);
-      navigate('/profile', { replace: true });
+
+      // If registration is successful, log the user in
+      if (data.token) {
+        login(data.token);
+        // The login function will handle the redirect to /profile
+      } else {
+        // If no token is returned, redirect to login
+        navigate('/login', { 
+          state: { 
+            message: 'Registration successful! Please log in.',
+            email: email
+          },
+          replace: true 
+        });
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      setPasswordError(error.message || 'An error occurred during registration');
     } finally {
       setLoading(false);
     }

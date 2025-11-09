@@ -93,11 +93,14 @@ const Landing = () => {
           <ol className="space-y-6 md:space-y-8 max-w-3xl mx-auto">
             <li className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <div className="flex items-center gap-3 text-primary mb-2">
-                <h3 className="text-lg md:text-xl font-semibold">1. Explore & Learn</h3>
+                <h3 className="text-lg md:text-xl font-semibold">Learn & Explore</h3>
               </div>
-              <div className="hidden md:block absolute right-4 top-4">
-            
-          
+              <div className="hidden md:block absolute right-4 top-4 w-32 h-32 rounded-lg overflow-hidden border-2 border-primary/20">
+                <img 
+                  src="/collection.jpg" 
+                  alt="Explore and learn about cultural heritage"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
                 <li>Browse Folksongs, Folktales, Ritual Practices and Material Culture contributed by communities.</li>
@@ -105,16 +108,19 @@ const Landing = () => {
                 <li>Access detailed descriptions, listen to audio clips, view cultural videos and read cultural content </li>
                 <li>Save your cultural stories to your collection for future learning.</li>
               </ul>
-              <p className="mt-3 text-xs md:text-sm text-foreground/80">Respect each item’s consent tier — not all content is meant for public use.</p>
+              <p className="mt-3 text-xs md:text-sm text-foreground/80">Respect each item's consent tier — not all content is meant for public use.</p>
             </li>
 
             <li className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <div className="flex items-center gap-3 text-primary mb-2">
-                <h3 className="text-lg md:text-xl font-semibold">2. Contribute Respectfully</h3>
+                <h3 className="text-lg md:text-xl font-semibold">Contribute Ethically</h3>
               </div>
-              <div className="hidden md:block absolute right-4 top-4">
-              
-  
+              <div className="hidden md:block absolute right-4 top-4 w-32 h-32 rounded-lg overflow-hidden border-2 border-primary/20">
+                <img 
+                  src="/contribute.jpg" 
+                  alt="Contribute to cultural preservation"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
                 <li>Share your own Folksongs, Folktales, Ritual Practices and Material Culture as text, image, audio, or video.</li>
@@ -127,11 +133,14 @@ const Landing = () => {
 
             <li className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
               <div className="flex items-center gap-3 text-primary mb-2">
-                <h3 className="text-lg md:text-xl font-semibold">3. Follow the Roadmap</h3>
+                <h3 className="text-lg md:text-xl font-semibold">Follow the Roadmap</h3>
               </div>
-              <div className="hidden md:block absolute right-4 top-4">
-              
-              
+              <div className="hidden md:block absolute right-4 top-4 w-32 h-32 rounded-lg overflow-hidden border-2 border-primary/20">
+                <img 
+                  src="/follow.jpg" 
+                  alt="Follow our cultural preservation roadmap"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
                 <li>Collection: Gathering Folk Stories and Material Culture with consent.</li>
@@ -151,8 +160,6 @@ const Landing = () => {
               <Link to="/upload">Contribute a Story</Link>
             </Button>
           </div>
-
-          
         </div>
       </section>
 
@@ -166,49 +173,66 @@ const Landing = () => {
           </div>
 
           <div className="max-w-3xl mx-auto">
-            <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
-              <h3 className="text-lg md:text-xl font-semibold">Collection</h3>
-              <div className="hidden md:block absolute right-4 top-4">
-              
-          
+            <div className="space-y-6">
+              <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
+                <h3 className="text-lg md:text-xl font-semibold text-primary">Collection</h3>
+                <div className="hidden md:block absolute right-4 top-4 w-32 h-32 rounded-lg overflow-hidden border-2 border-primary/20">
+                  <img 
+                    src={"/collection.jpg"}
+                    alt="Collection of cultural artifacts"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="mt-2 text-sm md:text-base text-foreground/85">Community members document Folksongs, Folktales, Ritual Practices and Material Culture with informed consent from the knowledge holders.</p>
+                <p className="mt-2 text-xs md:text-sm text-foreground/80"><em>Goal: Preserve Cultural Heritage Ethically</em></p>
               </div>
-              <p className="mt-2 text-sm md:text-base text-foreground/85">Community members document Folksongs, Folktales, Ritual Practices and Material Culture with informed consent from the knowledge holders.</p>
-              <p className="mt-2 text-xs md:text-sm text-foreground/80"><em>Goal: Preserve Cultural Heritage Ethically</em></p>
-            </div>
 
-            <div className="my-3 md:my-4 text-center" aria-hidden></div>
+              <div className="my-3 md:my-4 text-center" aria-hidden></div>
 
-            <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
-              <h3 className="text-lg md:text-xl font-semibold">Verification</h3>
-              <div className="hidden md:block absolute right-4 top-4">
-                
+              <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
+                <h3 className="text-lg md:text-xl font-semibold text-primary">Verification</h3>
+                <div className="hidden md:block absolute right-4 top-4 w-32 h-32 rounded-lg overflow-hidden border-2 border-primary/20">
+                  <img 
+                    src={"/verification.jpg"}
+                    alt="Verification process by community elders"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="mt-2 text-sm md:text-base text-foreground/85">Community elders and cultural experts carefully review each submission for accuracy, sensitivity, and cultural integrity.</p>
+                <p className="mt-2 text-xs md:text-sm text-foreground/80"><em>Goal: Ensure Authenticity and Ethical Handling.</em></p>
               </div>
-              <p className="mt-2 text-sm md:text-base text-foreground/85">Community elders and cultural experts carefully review each submission for accuracy, sensitivity, and cultural integrity.</p>
-              <p className="mt-2 text-xs md:text-sm text-foreground/80"><em>Goal: Ensure Authenticity and Ethical Handling.</em></p>
-            </div>
 
-            <div className="my-3 md:my-4 text-center" aria-hidden></div>
+              <div className="my-3 md:my-4 text-center" aria-hidden></div>
 
-            <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
-              <h3 className="text-lg md:text-xl font-semibold">Publication</h3>
-              <div className="hidden md:block absolute right-4 top-4">
-              
+              <div className="rounded-xl p-5 md:p-6 md:pr-40 bg-card/80 backdrop-blur border relative overflow-hidden">
+                <div className="flex items-center gap-3 text-primary mb-2">
+                  <h3 className="text-lg md:text-xl font-semibold">Publication</h3>
+                </div>
+                <div className="hidden md:block absolute right-4 top-4 w-32 h-32 rounded-lg overflow-hidden border-2 border-primary/20">
+                  <img 
+                    src={"/publication.jpg"}
+                    alt="Publication with tiered access"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="text-sm md:text-base text-foreground/85 mb-3">
+                  Once verified, the content is published in the Repository with tiered access:
+                </p>
+                <ul className="list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
+                  <li><span className="font-medium">Public</span> → Open for all viewers</li>
+                  <li><span className="font-medium">Restricted</span> → Limited to researchers/learners</li>
+                  <li><span className="font-medium">Confidential</span> → Accessible only to designated custodians</li>
+                </ul>
+                <p className="mt-3 text-xs md:text-sm text-foreground/80">
+                  <span className="font-medium">Goal:</span> Protect Cultural Heritage Knowledge while promoting cultural awareness, education and cultural continuity.
+                </p>
               </div>
-              <p className="mt-2 text-sm md:text-base text-foreground/85">Once verified, the content is published in the Repository with tiered access:</p>
-              <ul className="mt-2 list-disc pl-5 text-sm md:text-base text-foreground/85 space-y-1">
-                <li>Public → Open for all viewers</li>
-                <li>Restricted → Limited to researchers/learners</li>
-                <li>Confidential → Accessible only to designated custodians</li>
-              </ul>
-              <p className="mt-2 text-xs md:text-sm text-foreground/80"><em>Goal: Protect Cultural Heritage Knowledge while promoting cultural awareness, education and cultural continuity.</em></p>
+
+              <blockquote className="mt-8 md:mt-10 border-l-2 pl-4 text-sm md:text-base text-foreground/85">
+                <p className="font-medium">"From Collection to Continuity"</p>
+                <p className="text-muted-foreground">Every cultural story travels through this ethical roadmap before it becomes part of our shared archive.</p>
+              </blockquote>
             </div>
-
-          
-
-            <blockquote className="mt-8 md:mt-10 border-l-2 pl-4 text-sm md:text-base text-foreground/85">
-              <p className="font-medium">“From Collection to Continuity”</p>
-              <p className="text-muted-foreground">Every cultural story travels through this ethical roadmap before it becomes part of our shared archive.</p>
-            </blockquote>
           </div>
         </div>
       </section>

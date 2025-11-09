@@ -10,7 +10,7 @@ services:
       - key: NODE_VERSION
         value: 22
       - key: MONGODB_URI
-        value: mongodb+srv://aadarshgolucky:****@cluster0.oss7hwd.mongodb.net/repo
+        value: mongodb+srv://repo:Moamenla%40123@cluster0.585ib8d.mongodb.net/repo?appName=Cluster0
       - key: PORT
         value: 5000
     disk:
